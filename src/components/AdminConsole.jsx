@@ -1,9 +1,23 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
 import { Tag, Ball } from './ui';
 
 export default function AdminConsole({ onBack }) {
+  const { profile } = useAuth();
+
+  if (!profile?.is_admin) {
+    return (
+      <div className="pane">
+        <button className="back" onClick={onBack}>{"←"} Back</button>
+        <div className="empty">
+          <div className="cardTitle">Access denied</div>
+          <div className="sub">Admin privileges required.</div>
+        </div>
+      </div>
+    );
+  }
   const [tab, setTab] = useState('posts');
   const [posts, setPosts] = useState([]);
   const [courts, setCourts] = useState([]);

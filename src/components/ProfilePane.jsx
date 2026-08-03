@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C, LEAGUES, CURRENT_LEAGUE_INDEX } from '../lib/constants';
 import { PersonAvatar, CourtBackdrop } from './ui';
 
 export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard }) {
-  const { profile, signOut } = useAuth();
+  const { profile, updateProfile, signOut } = useAuth();
   const [connectionCount, setConnectionCount] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
 
   useEffect(() => {
     if (!profile) return;
@@ -29,6 +31,26 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard }) {
     setSessionCount(sessCount || 0);
   }
 
+  async function handlePhotoUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const ext = file.name.split('.').pop();
+    const path = `${profile.id}/avatar.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from('profile-photos')
+      .upload(path, file, { upsert: true });
+    if (upErr) {
+      setUploading(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage
+      .from('profile-photos')
+      .getPublicUrl(path);
+    await updateProfile({ photo_url: urlData.publicUrl });
+    setUploading(false);
+  }
+
   if (!profile) return null;
   const league = LEAGUES[CURRENT_LEAGUE_INDEX];
 
@@ -36,8 +58,10 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard }) {
     <div className="pane">
       <div className="profileHero">
         <CourtBackdrop />
-        <div className="profilePhotoBig">
+        <div className="profilePhotoBig" onClick={() => fileRef.current?.click()} style={{ cursor: 'pointer' }}>
           <PersonAvatar name={profile.full_name} photo={profile.photo_url} size={90} />
+          <div className="photoEditBadge">{uploading ? '...' : '\u{1F4F7}'}</div>
+          <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
         </div>
       </div>
 
@@ -45,7 +69,7 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard }) {
         <span className="profileName">{profile.full_name}</span>
       </div>
       <div className="sub">
-        Member since {new Date(profile.member_since).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+        Member since {new Date(profile.member_since || profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
       </div>
 
       <div className="statGrid" style={{ marginTop: 14 }}>

@@ -117,7 +117,7 @@ function AppInner() {
     if (overlay === 'leaderboard') return <LeaderboardScreen onBack={closeOverlay} />;
     if (overlay === 'playerProfile') return <PlayerProfileScreen profileId={overlayData} onBack={closeOverlay} />;
     if (overlay === 'tournament') return <TournamentDetail tournament={overlayData.tournament} court={overlayData.court} onBack={closeOverlay} />;
-    if (overlay === 'admin') return <AdminConsole onBack={closeOverlay} />;
+    if (overlay === 'admin' && profile?.is_admin) return <AdminConsole onBack={closeOverlay} />;
 
     if (showNotifications) return <NotificationsScreen onBack={() => { setShowNotifications(false); loadUnreadCount(); }} />;
 

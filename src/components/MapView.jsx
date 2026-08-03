@@ -11,6 +11,7 @@ export default function MapView({ onOpenCourt }) {
   const [courts, setCourts] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(
@@ -25,10 +26,14 @@ export default function MapView({ onOpenCourt }) {
 
   async function loadCourts() {
     setLoading(true);
-    const { data } = await supabase
+    setError(null);
+    const { data, error: err } = await supabase
       .from('courts')
       .select('*')
       .order('name');
+
+    if (err) { setError(err.message); setLoading(false); return; }
+
     setCourts(data || []);
     setLoading(false);
   }
@@ -46,6 +51,8 @@ export default function MapView({ onOpenCourt }) {
           {userLocation ? 'GPS on · distances from your real location' : 'Enable location for distances'}
         </div>
       </div>
+
+      {error && <div className="errorBanner">{error}</div>}
 
       {!loading && courts.length > 0 && (
         <div className="mapWrap">

@@ -15,6 +15,7 @@ export default function SessionsScreen() {
   const [courts, setCourts] = useState({});
   const [participants, setParticipants] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [detail, setDetail] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
 
@@ -33,13 +34,16 @@ export default function SessionsScreen() {
 
   const loadSessions = useCallback(async () => {
     setLoading(true);
-    const { data: sessData } = await supabase
+    setError(null);
+    const { data: sessData, error: err } = await supabase
       .from('sessions')
       .select(`
         *,
         court:court_id(*)
       `)
       .order('created_at', { ascending: false });
+
+    if (err) { setError(err.message); setLoading(false); return; }
 
     const sessionList = sessData || [];
     const courtMap = {};
@@ -132,6 +136,8 @@ export default function SessionsScreen() {
         <h1 className="h1">Sessions Near You</h1>
         <div className="sub">Browse open play, training, and rentals</div>
       </div>
+
+      {error && <div className="errorBanner">{error}</div>}
 
       {tournaments.length > 0 && (
         <>

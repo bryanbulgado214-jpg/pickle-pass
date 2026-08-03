@@ -12,6 +12,7 @@ export default function NetworkScreen({ onBack, onOpenProfile }) {
   const [sent, setSent] = useState([]);
   const [allProfiles, setAllProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadNetwork();
@@ -19,11 +20,15 @@ export default function NetworkScreen({ onBack, onOpenProfile }) {
 
   async function loadNetwork() {
     setLoading(true);
+    setError(null);
 
-    const { data: connData } = await supabase
+    const { data: connData, error: err } = await supabase
       .from('connections')
       .select('*, profile_a:profile_id_a(id, full_name, photo_url), profile_b:profile_id_b(id, full_name, photo_url)')
       .or(`profile_id_a.eq.${user.id},profile_id_b.eq.${user.id}`);
+
+    if (err) { setError(err.message); setLoading(false); return; }
+
     const connProfiles = (connData || []).map((c) =>
       c.profile_id_a === user.id ? c.profile_b : c.profile_a
     ).filter(Boolean);
@@ -96,6 +101,8 @@ export default function NetworkScreen({ onBack, onOpenProfile }) {
         <div className="h1">MY NETWORK</div>
         <div className="sub">Connect with other players</div>
       </div>
+
+      {error && <div className="errorBanner">{error}</div>}
 
       <div className="segment networkSeg">
         {[

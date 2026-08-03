@@ -10,13 +10,15 @@ export default function FeedScreen({ onOpenProfile }) {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [commentsPostId, setCommentsPostId] = useState(null);
   const [feedFilter, setFeedFilter] = useState('foryou');
 
   const loadPosts = useCallback(async () => {
     setLoading(true);
+    setError(null);
 
-    const { data: rawPosts } = await supabase
+    const { data: rawPosts, error: err } = await supabase
       .from('posts')
       .select(`
         *,
@@ -28,6 +30,8 @@ export default function FeedScreen({ onOpenProfile }) {
       .in('status', ['approved', ...(user ? ['pending'] : [])])
       .order('created_at', { ascending: false })
       .limit(30);
+
+    if (err) { setError(err.message); setLoading(false); return; }
 
     const enriched = (rawPosts || [])
       .filter((p) => p.status === 'approved' || p.profile_id === user?.id)
@@ -74,6 +78,8 @@ export default function FeedScreen({ onOpenProfile }) {
           </div>
         </div>
       </div>
+
+      {error && <div className="errorBanner">{error}</div>}
 
       <PostComposer onPostCreated={loadPosts} />
 

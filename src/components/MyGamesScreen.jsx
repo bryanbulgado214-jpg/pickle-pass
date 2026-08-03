@@ -10,6 +10,7 @@ export default function MyGamesScreen() {
   const [waitlisted, setWaitlisted] = useState([]);
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadMyGames();
@@ -17,12 +18,15 @@ export default function MyGamesScreen() {
 
   async function loadMyGames() {
     setLoading(true);
+    setError(null);
 
-    const { data: participants } = await supabase
+    const { data: participants, error: err } = await supabase
       .from('session_participants')
       .select('*, session:session_id(id, label, schedule_text, fee, court:court_id(id, name, town))')
       .eq('profile_id', user.id)
       .in('status', ['confirmed', 'waitlisted']);
+
+    if (err) { setError(err.message); setLoading(false); return; }
 
     const conf = [];
     const wait = [];
@@ -78,6 +82,8 @@ export default function MyGamesScreen() {
         <div className="h1">MY GAMES</div>
         <div className="sub">Your upcoming sessions</div>
       </div>
+
+      {error && <div className="errorBanner">{error}</div>}
 
       {empty && (
         <div className="empty">
