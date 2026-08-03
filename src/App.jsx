@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { supabase } from './lib/supabase';
 import { C } from './lib/constants';
 import { LOGO_ICON } from './lib/logos';
-import { PersonAvatar, NotificationBell } from './components/ui';
+import { PersonAvatar, NotificationBell, PaddleIcon } from './components/ui';
 import AuthScreen from './components/AuthScreen';
 import FeedScreen from './components/FeedScreen';
 import SessionsScreen from './components/SessionsScreen';
@@ -80,9 +80,10 @@ function AppInner() {
 
   const activeCourt = myCourts.find((c) => c.id === activeOwnerCourtId) || myCourts[0];
 
+  const paddle = <PaddleIcon size={18} />;
   const playerNav = [
     ['feed', 'Feed', '\u{1F4F0}'],
-    ['play', 'Play', '\u{1F3D3}'],
+    ['play', 'Play', paddle],
     ['map', 'Map', '\u{1F5FA}'],
     ['games', 'My Games', '\u{1F3AB}'],
     ['profile', 'Profile', '\u{1F464}'],
@@ -92,7 +93,7 @@ function AppInner() {
     ['home', 'Dashboard', '\u{1F3E0}'],
     ['new', 'New Listing', '➕'],
     ['earnings', 'Payouts', '\u{1F4B0}'],
-    ['player', '← Player', '\u{1F3D3}'],
+    ['player', '← Player', paddle],
   ];
 
   const navItems = mode === 'owner' ? ownerNav : playerNav;
