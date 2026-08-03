@@ -6,6 +6,8 @@ import { haversineKm } from '../lib/utils';
 import { SearchFilterBar } from './ui';
 import SessionCard from './SessionCard';
 import CourtDetail from './CourtDetail';
+import TournamentCard from './TournamentCard';
+import TournamentDetail from './TournamentDetail';
 
 export default function SessionsScreen() {
   const { user } = useAuth();
@@ -16,9 +18,11 @@ export default function SessionsScreen() {
   const [detail, setDetail] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
 
+  const [tournaments, setTournaments] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [sortBy, setSortBy] = useState('distance');
+  const [tourneyOpen, setTourneyOpen] = useState(null);
 
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(
@@ -56,9 +60,15 @@ export default function SessionsScreen() {
       });
     }
 
+    const { data: tourneyData } = await supabase
+      .from('tournaments')
+      .select('*, court:court_id(id, name, town, verified)')
+      .order('created_at', { ascending: false });
+
     setSessions(sessionList);
     setCourts(courtMap);
     setParticipants(partMap);
+    setTournaments(tourneyData || []);
     setLoading(false);
   }, []);
 
@@ -96,6 +106,16 @@ export default function SessionsScreen() {
     });
   }
 
+  if (tourneyOpen) {
+    return (
+      <TournamentDetail
+        tournament={tourneyOpen}
+        court={tourneyOpen.court}
+        onBack={() => setTourneyOpen(null)}
+      />
+    );
+  }
+
   if (detail) {
     return (
       <CourtDetail
@@ -112,6 +132,17 @@ export default function SessionsScreen() {
         <h1 className="h1">Sessions Near You</h1>
         <div className="sub">Browse open play, training, and rentals</div>
       </div>
+
+      {tournaments.length > 0 && (
+        <>
+          <div className="h2" style={{ marginTop: 0 }}>{"\u{1F3C6}"} UPCOMING TOURNAMENTS</div>
+          <div className="tourneyStrip">
+            {tournaments.map((t) => (
+              <TournamentCard key={t.id} tournament={t} court={t.court} onOpen={setTourneyOpen} />
+            ))}
+          </div>
+        </>
+      )}
 
       <SearchFilterBar
         query={searchQuery}

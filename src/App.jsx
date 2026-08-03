@@ -15,6 +15,7 @@ import LeaderboardScreen from './components/LeaderboardScreen';
 import PlayerProfileScreen from './components/PlayerProfileScreen';
 import TournamentDetail from './components/TournamentDetail';
 import CancelSheet from './components/CancelSheet';
+import MyGamesScreen from './components/MyGamesScreen';
 import AdminConsole from './components/AdminConsole';
 import { OwnerVerifyScreen, OwnerHome, OwnerNew, OwnerEarnings } from './components/OwnerScreens';
 
@@ -83,6 +84,7 @@ function AppInner() {
     ['feed', 'Feed', '\u{1F4F0}'],
     ['play', 'Play', '\u{1F3D3}'],
     ['map', 'Map', '\u{1F5FA}'],
+    ['games', 'My Games', '\u{1F3AB}'],
     ['profile', 'Profile', '\u{1F464}'],
   ];
 
@@ -145,6 +147,7 @@ function AppInner() {
     if (tab === 'feed') return <FeedScreen />;
     if (tab === 'play') return <SessionsScreen />;
     if (tab === 'map') return <MapView onOpenCourt={(ct) => openOverlay('court', ct)} />;
+    if (tab === 'games') return <MyGamesScreen />;
     if (tab === 'profile') {
       return (
         <ProfilePane
