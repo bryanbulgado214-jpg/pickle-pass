@@ -3,13 +3,16 @@ import { colorForName } from '../lib/utils';
 
 export const PaddleIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <ellipse cx="12" cy="9.5" rx="7.5" ry="9" fill="currentColor" opacity="0.9" />
-    <ellipse cx="12" cy="9.5" rx="6" ry="7.5" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.4" />
-    <rect x="10.8" y="17.5" width="2.4" height="5.5" rx="1.2" fill="currentColor" opacity="0.7" />
-    <circle cx="9" cy="7" r="1" fill={C.ink} opacity="0.5" />
-    <circle cx="13" cy="6" r="1" fill={C.ink} opacity="0.5" />
-    <circle cx="15" cy="10" r="1" fill={C.ink} opacity="0.5" />
-    <circle cx="10" cy="11" r="1" fill={C.ink} opacity="0.5" />
+    <g transform="translate(12,12) rotate(-30) translate(-12,-12)">
+      <rect x="6" y="1.5" width="12" height="13.5" rx="3.5" fill="currentColor" opacity="0.9" />
+      <rect x="7" y="2.5" width="10" height="11.5" rx="2.5" fill="none" stroke="currentColor" strokeWidth="0.6" opacity="0.3" />
+      <rect x="10.2" y="14.5" width="3.6" height="7.5" rx="1.3" fill="currentColor" opacity="0.7" />
+      <line x1="10.5" y1="16" x2="13.5" y2="16" stroke={C.ink} strokeWidth="0.6" opacity="0.45" />
+      <line x1="10.5" y1="17.3" x2="13.5" y2="17.3" stroke={C.ink} strokeWidth="0.6" opacity="0.45" />
+      <line x1="10.5" y1="18.6" x2="13.5" y2="18.6" stroke={C.ink} strokeWidth="0.6" opacity="0.45" />
+      <line x1="10.5" y1="19.9" x2="13.5" y2="19.9" stroke={C.ink} strokeWidth="0.6" opacity="0.45" />
+      <rect x="9.7" y="21.5" width="4.6" height="1.5" rx="0.75" fill="currentColor" opacity="0.6" />
+    </g>
   </svg>
 );
 
