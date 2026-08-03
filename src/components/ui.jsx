@@ -117,7 +117,7 @@ export const SearchFilterBar = ({ query, onQuery, typeFilter, onTypeFilter, sort
   <div className="searchBar">
     <input
       className="searchInput"
-      placeholder="\u{1F50D} Search courts, towns, sessions…"
+      placeholder="🔍 Search courts, towns, sessions…"
       value={query}
       onChange={(e) => onQuery(e.target.value)}
     />
