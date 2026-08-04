@@ -23,6 +23,8 @@ import ChatScreen from './components/ChatScreen';
 import QRScanner from './components/QRScanner';
 import ReferralScreen from './components/ReferralScreen';
 import SessionReminders from './components/SessionReminders';
+import PaymentHistory from './components/PaymentHistory';
+import { OwnerPayoutLedger } from './components/PaymentHistory';
 
 function AppInner() {
   const { user, profile, loading, signOut } = useAuth();
@@ -36,6 +38,12 @@ function AppInner() {
   const [activeOwnerCourtId, setActiveOwnerCourtId] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [pushDismissed, setPushDismissed] = useState(() => localStorage.getItem('pp_push_dismissed') === '1');
+  const [theme, setTheme] = useState(() => localStorage.getItem('pp_theme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('pp_theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     if (!user) return;
@@ -124,6 +132,7 @@ function AppInner() {
     if (overlay === 'chat') return <ChatScreen onBack={closeOverlay} onOpenProfile={(id) => openOverlay('playerProfile', id)} />;
     if (overlay === 'scanner') return <QRScanner onBack={closeOverlay} />;
     if (overlay === 'referral') return <ReferralScreen onBack={closeOverlay} />;
+    if (overlay === 'payments') return <PaymentHistory onBack={closeOverlay} />;
     if (overlay === 'network') return <NetworkScreen onBack={closeOverlay} onOpenProfile={(id) => openOverlay('playerProfile', id)} />;
     if (overlay === 'leaderboard') return <LeaderboardScreen onBack={closeOverlay} />;
     if (overlay === 'playerProfile') return <PlayerProfileScreen profileId={overlayData} onBack={closeOverlay} />;
@@ -153,7 +162,7 @@ function AppInner() {
       if (ownerTab === 'home') return <OwnerHome court={activeCourt} myCourts={myCourts} activeOwnerCourtId={activeOwnerCourtId} onSwitchCourt={setActiveOwnerCourtId} onOpenScanner={() => openOverlay('scanner')} />;
       if (ownerTab === 'analytics') return <OwnerAnalytics court={activeCourt} />;
       if (ownerTab === 'new') return <OwnerNew courtId={activeCourt.id} onPost={() => setOwnerTab('home')} />;
-      if (ownerTab === 'earnings') return <OwnerEarnings />;
+      if (ownerTab === 'earnings') return <OwnerPayoutLedger />;
     }
 
     if (tab === 'feed') return <FeedScreen />;
@@ -167,6 +176,9 @@ function AppInner() {
           onOpenLeaderboard={() => openOverlay('leaderboard')}
           onOpenChat={() => openOverlay('chat')}
           onOpenReferral={() => openOverlay('referral')}
+          onOpenPayments={() => openOverlay('payments')}
+          theme={theme}
+          onToggleTheme={() => setTheme((t) => t === 'dark' ? 'light' : 'dark')}
         />
       );
     }

@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { C, LEAGUES, CURRENT_LEAGUE_INDEX } from '../lib/constants';
 import { PersonAvatar, CourtBackdrop } from './ui';
 
-export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenChat, onOpenReferral }) {
+export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenChat, onOpenReferral, onOpenPayments, theme, onToggleTheme }) {
   const { profile, updateProfile, signOut } = useAuth();
   const [connectionCount, setConnectionCount] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
@@ -104,6 +104,16 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenCh
       <button className="profileLinkRow" onClick={onOpenReferral}>
         <span>{"\u{1F381}"} Invite Friends</span>
         <span className="profileLinkVal">{"→"}</span>
+      </button>
+
+      <button className="profileLinkRow" onClick={onOpenPayments}>
+        <span>{"\u{1F4B3}"} Payment History</span>
+        <span className="profileLinkVal">{"→"}</span>
+      </button>
+
+      <button className="profileLinkRow" onClick={onToggleTheme}>
+        <span>{theme === 'dark' ? '\u{2600}\u{FE0F}' : '\u{1F319}'} {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+        <span className="profileLinkVal">{theme === 'dark' ? '☀️' : '🌙'}</span>
       </button>
 
       <button

@@ -7,6 +7,7 @@ import PaySheet from './PaySheet';
 import ReviewSheet from './ReviewSheet';
 import BookingCalendar from './BookingCalendar';
 import { CourtGalleryViewer } from './CourtGallery';
+import ShareButton from './ShareButton';
 
 export default function CourtDetail({ session, court, onBack }) {
   const { user } = useAuth();
@@ -180,6 +181,13 @@ export default function CourtDetail({ session, court, onBack }) {
       <div className="fine">
         5% service fee ({"₱"}{serviceFee.toFixed(2)}) applies. Full refund if you cancel before the session starts.
       </div>
+
+      <ShareButton
+        title={session.label}
+        text={`Join ${session.label} at ${court.name}! ₱${fee} per person on Pickle Pass`}
+        url={window.location.origin}
+        label="Share Session"
+      />
 
       {session.type === 'RENTAL' && (
         <BookingCalendar court={court} fee={fee} onBook={loadParticipants} />

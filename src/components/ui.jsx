@@ -37,6 +37,8 @@ export const Tag = ({ children, tone }) => {
     full: { bg: "rgba(255,107,87,0.16)", fg: C.coral },
     tourney: { bg: "rgba(212,175,55,0.18)", fg: "#D4AF37" },
     waitlist: { bg: "rgba(215,240,0,0.14)", fg: C.ball },
+    courtOpen: { bg: "rgba(57,217,138,0.15)", fg: "#39D98A" },
+    courtClosed: { bg: "rgba(255,107,87,0.12)", fg: "#FF6B57" },
   };
   const t = tones[tone] || tones.rental;
   return <span className="tag" style={{ background: t.bg, color: t.fg }}>{children}</span>;

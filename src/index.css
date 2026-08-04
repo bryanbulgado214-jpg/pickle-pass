@@ -1,6 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
-body { margin: 0; background: #06222E; color: #F2F6F1; font-family: 'Outfit', sans-serif; }
+:root {
+  --bg: #06222E; --ink: #0A2E3C; --ink2: #0F3D4E; --ink3: #155066;
+  --text: #F2F6F1; --sand: #B8C9CF; --court: #178A63; --ball: #D7F000;
+  --line-border: rgba(242,246,241,0.12); --line-border2: rgba(242,246,241,0.15);
+}
+[data-theme="light"] {
+  --bg: #F0F4F3; --ink: #FFFFFF; --ink2: #E8EDEC; --ink3: #D5DCDB;
+  --text: #0A2E3C; --sand: #5A7A85; --court: #178A63; --ball: #B5C800;
+  --line-border: rgba(10,46,60,0.1); --line-border2: rgba(10,46,60,0.12);
+}
+
+body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; transition: background 0.3s, color 0.3s; }
 
 * { box-sizing: border-box; margin: 0; }
 .stage {
@@ -21,7 +32,7 @@ body { margin: 0; background: #06222E; color: #F2F6F1; font-family: 'Outfit', sa
   box-shadow: 0 30px 80px rgba(0,0,0,0.5);
 }
 .topBar { padding: 16px 16px 12px; display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid rgba(242,246,241,0.1); }
+  border-bottom: 1px solid var(--line-border); background: var(--ink); }
 .brand { display: flex; align-items: center; gap: 8px; }
 .brandIcon { width: 28px; height: 28px; object-fit: contain; display: block; }
 .brandName { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: 1.5px; color: #F2F6F1; }
@@ -32,13 +43,13 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .body { flex: 1; overflow-y: auto; }
 .pane { padding: 16px 16px 24px; }
 .paneHead { margin-bottom: 14px; }
-.h1 { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: 1.2px; color: #F2F6F1; }
-.h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 1.8px; color: #B8C9CF; margin: 16px 0 8px; }
-.sub { color: #B8C9CF; font-size: 13px; margin-top: 3px; }
+.h1 { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: 1.2px; color: var(--text); }
+.h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 1.8px; color: var(--sand); margin: 16px 0 8px; }
+.sub { color: var(--sand); font-size: 13px; margin-top: 3px; }
 
 .card { display: block; width: 100%; text-align: left; cursor: pointer;
-  background: #0F3D4E; border: 1px solid rgba(242,246,241,0.12);
-  border-left: 3px solid #178A63;
+  background: var(--ink2); border: 1px solid var(--line-border);
+  border-left: 3px solid var(--court);
   border-radius: 16px; padding: 14px; margin-bottom: 12px; color: inherit; font-family: inherit; }
 .card:hover { border-color: rgba(215,240,0,0.5); }
 .card:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid #D7F000; outline-offset: 2px; }
@@ -46,12 +57,12 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .rowTags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
 .tag { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 11.5px; letter-spacing: 1.4px;
   padding: 3px 8px; border-radius: 6px; }
-.cardTitle { font-weight: 600; font-size: 16px; color: #F2F6F1; }
-.cardSub { color: #B8C9CF; font-size: 13px; margin-top: 2px; }
-.cardMeta { color: #B8C9CF; font-size: 12.5px; margin-top: 4px; }
+.cardTitle { font-weight: 600; font-size: 16px; color: var(--text); }
+.cardSub { color: var(--sand); font-size: 13px; margin-top: 2px; }
+.cardMeta { color: var(--sand); font-size: 12.5px; margin-top: 4px; }
 .cardFee { text-align: right; flex-shrink: 0; }
-.feeAmt { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; color: #F2F6F1; }
-.feeUnit { color: #B8C9CF; font-size: 11.5px; }
+.feeAmt { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; color: var(--text); }
+.feeUnit { color: var(--sand); font-size: 11.5px; }
 
 .cap { margin-top: 12px; }
 .capBig .capScore { font-size: 40px; }
@@ -73,9 +84,9 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .heroSub { color: rgba(255,255,255,0.85); font-size: 13.5px; margin-top: 3px; }
 
 .statGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
-.stat { background: #0F3D4E; border: 1px solid rgba(242,246,241,0.12); border-radius: 12px; padding: 10px 12px; }
-.statK { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 1.8px; color: #B8C9CF; }
-.statV { color: #F2F6F1; font-weight: 600; font-size: 13.5px; margin-top: 2px; }
+.stat { background: var(--ink2); border: 1px solid var(--line-border); border-radius: 12px; padding: 10px 12px; }
+.statK { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 1.8px; color: var(--sand); }
+.statV { color: var(--text); font-weight: 600; font-size: 13.5px; margin-top: 2px; }
 .block { background: #0F3D4E; border: 1px solid rgba(242,246,241,0.12); border-radius: 14px; padding: 12px 14px 14px; margin-top: 12px; }
 .block .h2 { margin-top: 0; }
 
@@ -207,8 +218,8 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
   background: #F2F6F1; padding: 6px; border-radius: 6px; }
 .qr span { background: #0A2E3C; }
 
-.nav { display: flex; border-top: 1px solid rgba(242,246,241,0.12); background: #0F3D4E; }
-.nav button { flex: 1; background: none; border: 0; color: #B8C9CF; padding: 10px 4px 14px; cursor: pointer;
+.nav { display: flex; border-top: 1px solid var(--line-border); background: var(--ink2); }
+.nav button { flex: 1; background: none; border: 0; color: var(--sand); padding: 10px 4px 14px; cursor: pointer;
   font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; display: flex; flex-direction: column; gap: 3px; align-items: center; }
 .nav .navOn { color: #D7F000; }
 .navIcon { font-size: 17px; }
@@ -291,7 +302,7 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .profileHero { position: relative; border-radius: 18px; height: 210px;
   display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
 .profileNameRow { display: flex; align-items: center; justify-content: space-between; margin: 12px 0 2px; }
-.profileName { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: 0.5px; color: #F2F6F1; }
+.profileName { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: 0.5px; color: var(--text); }
 .courtBackdrop { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
 .profilePhotoBig { position: relative; z-index: 1; margin-bottom: 16px; border-radius: 50%;
   box-shadow: 0 0 0 4px rgba(215,240,0,0.45), 0 10px 24px rgba(0,0,0,0.35); }
@@ -302,7 +313,7 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .feedSeg { flex: 1; }
 .findBtn { flex-shrink: 0; background: #D7F000; color: #0A2E3C; border: 0; border-radius: 10px;
   padding: 9px 12px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12.5px; letter-spacing: 0.4px; cursor: pointer; white-space: nowrap; }
-.feedPost { background: #0F3D4E; border: 1px solid rgba(242,246,241,0.12); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+.feedPost { background: var(--ink2); border: 1px solid var(--line-border); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
 .feedHead { display: flex; align-items: center; gap: 10px; }
 .feedHeadBtn { background: none; border: 0; padding: 0; margin: 0; width: 100%; text-align: left; cursor: pointer; font-family: inherit; }
 .feedHeadBtn:hover .feedName { color: #D7F000; }
@@ -709,6 +720,68 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
   color: #F2F6F1; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px;
   letter-spacing: 0.8px; cursor: pointer; }
 .scannerCta:hover { background: #1a9b71; }
+
+/* court availability status */
+.tag[class*="courtOpen"] { background: rgba(57,217,138,0.15); color: #39D98A; }
+.tag[class*="courtClosed"] { background: rgba(255,107,87,0.12); color: #FF6B57; }
+
+/* payment receipts */
+.receiptCard { background: var(--ink2); border: 1px solid var(--line-border); border-radius: 14px;
+  padding: 14px; margin-bottom: 10px; }
+.receiptTop { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.receiptType { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 11px;
+  letter-spacing: 1.2px; color: var(--sand); margin-bottom: 4px; }
+.receiptAmt { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px;
+  color: var(--text); flex-shrink: 0; }
+.receiptBottom { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 8px;
+  border-top: 1px solid var(--line-border); color: var(--sand); font-size: 11.5px; }
+
+/* share button */
+.shareBtn { display: inline-flex; align-items: center; gap: 6px; background: none;
+  border: 1px solid rgba(215,240,0,0.4); color: #D7F000; border-radius: 10px;
+  padding: 8px 14px; margin-top: 10px; font-family: 'Outfit', sans-serif;
+  font-weight: 600; font-size: 12.5px; cursor: pointer; }
+.shareBtn:hover { background: rgba(215,240,0,0.1); }
+
+/* light theme overrides */
+[data-theme="light"] .brandName { color: var(--text); }
+[data-theme="light"] .topBar { background: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+[data-theme="light"] .nav { background: var(--ink); box-shadow: 0 -1px 4px rgba(0,0,0,0.06); }
+[data-theme="light"] .card { background: var(--ink); border-color: var(--line-border); }
+[data-theme="light"] .feedPost { background: var(--ink); }
+[data-theme="light"] .stat { background: var(--ink); }
+[data-theme="light"] .ticket { background: var(--ink); border-color: rgba(23,138,99,0.3); }
+[data-theme="light"] .profileLinkRow { background: var(--ink); border-color: var(--line-border); color: var(--text); }
+[data-theme="light"] .input { background: var(--ink2); border-color: var(--line-border2); color: var(--text); }
+[data-theme="light"] .composer { background: var(--ink); }
+[data-theme="light"] .composerInput { background: var(--ink2); color: var(--text); }
+[data-theme="light"] .ownerCard { background: var(--ink); border-color: var(--line-border); }
+[data-theme="light"] .analyticsBlock { background: var(--ink); }
+[data-theme="light"] .chatRow { background: var(--ink); border-color: var(--line-border); }
+[data-theme="light"] .chatBubble { background: var(--ink2); border-color: var(--line-border); }
+[data-theme="light"] .receiptCard { background: var(--ink); }
+[data-theme="light"] .reviewCard { background: var(--ink); border-color: var(--line-border); }
+[data-theme="light"] .notifRow { background: var(--ink); border-color: var(--line-border); }
+[data-theme="light"] .referralCard { background: linear-gradient(135deg, #178A63, #0E5A42); }
+[data-theme="light"] .scannerCta { background: #178A63; }
+[data-theme="light"] .shareBtn { border-color: rgba(23,138,99,0.4); color: #178A63; }
+[data-theme="light"] .shareBtn:hover { background: rgba(23,138,99,0.08); }
+[data-theme="light"] .cta { background: #178A63; color: #fff; }
+[data-theme="light"] .nav .navOn { color: #178A63; }
+[data-theme="light"] .back { color: #178A63; }
+[data-theme="light"] .profileLinkVal { color: #178A63; }
+[data-theme="light"] .bookingCal { border-color: var(--line-border); }
+[data-theme="light"] .calSlot.open { background: rgba(23,138,99,0.1); border-color: rgba(23,138,99,0.2); }
+[data-theme="light"] .calSlot.selected { background: rgba(23,138,99,0.2); border-color: #178A63; color: #178A63; }
+[data-theme="light"] .calConfirm { background: var(--ink); border-color: rgba(23,138,99,0.3); }
+[data-theme="light"] .searchInput { background: var(--ink); border-color: var(--line-border2); color: var(--text); }
+[data-theme="light"] .filterChips button { background: var(--ink); border-color: var(--line-border2); color: var(--sand); }
+[data-theme="light"] .filterChips .chipOn { background: #178A63; color: #fff; border-color: #178A63; }
+[data-theme="light"] .modeSwitch { background: var(--ink2); color: var(--sand); border-color: var(--line-border2); }
+[data-theme="light"] .modeSwitch:hover { background: #178A63; color: #fff; }
+[data-theme="light"] .logout { border-color: var(--line-border2); color: var(--sand); }
+[data-theme="light"] .feeAmt { color: var(--text); }
+[data-theme="light"] .galleryAdd { background: var(--ink2); border-color: var(--line-border2); }
 
 /* recurring booking toggle */
 .recurringToggle { display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer;
