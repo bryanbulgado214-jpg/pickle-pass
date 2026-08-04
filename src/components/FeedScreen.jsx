@@ -107,7 +107,13 @@ export default function FeedScreen({ onOpenProfile }) {
         </button>
       )}
 
-      <PostComposer onPostCreated={loadPosts} />
+      <PostComposer onPostCreated={(optimistic) => {
+        if (optimistic) {
+          setPosts((prev) => [optimistic, ...prev.filter((p) => !p._optimistic)]);
+        } else {
+          loadPosts();
+        }
+      }} />
 
       {loading && <LoadingBall text="Loading feed…" />}
 
