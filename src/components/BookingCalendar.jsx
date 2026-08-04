@@ -28,6 +28,7 @@ export default function BookingCalendar({ court, fee, onBook }) {
   });
   const [bookings, setBookings] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [recurring, setRecurring] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const dates = getWeekDates(weekStart);
@@ -79,16 +80,33 @@ export default function BookingCalendar({ court, fee, onBook }) {
 
   async function handleBook() {
     if (!selected) return;
-    const dateStr = selected.date.toISOString().split('T')[0];
 
-    await supabase.from('court_bookings').insert({
-      court_id: court.id,
-      profile_id: user.id,
-      booking_date: dateStr,
-      time_slot: selected.slot,
-    });
+    if (recurring) {
+      const inserts = [];
+      for (let w = 0; w < 4; w++) {
+        const d = new Date(selected.date);
+        d.setDate(d.getDate() + w * 7);
+        inserts.push({
+          court_id: court.id,
+          profile_id: user.id,
+          booking_date: d.toISOString().split('T')[0],
+          time_slot: selected.slot,
+          is_recurring: true,
+        });
+      }
+      await supabase.from('court_bookings').insert(inserts);
+    } else {
+      const dateStr = selected.date.toISOString().split('T')[0];
+      await supabase.from('court_bookings').insert({
+        court_id: court.id,
+        profile_id: user.id,
+        booking_date: dateStr,
+        time_slot: selected.slot,
+      });
+    }
 
     setSelected(null);
+    setRecurring(false);
     loadBookings();
     onBook?.();
   }
@@ -170,8 +188,18 @@ export default function BookingCalendar({ court, fee, onBook }) {
           <div className="calConfirmText">
             {dayLabels[selected.date.getDay()]}, {selected.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {selected.slot}
           </div>
+          <label className="recurringToggle">
+            <input
+              type="checkbox"
+              checked={recurring}
+              onChange={(e) => setRecurring(e.target.checked)}
+            />
+            <span>Repeat weekly for 4 weeks</span>
+          </label>
           <button className="cta" onClick={handleBook}>
-            Book for {"₱"}{fee} via Pickle Pass
+            {recurring
+              ? `Book 4 weeks for ₱${fee * 4} via Pickle Pass`
+              : `Book for ₱${fee} via Pickle Pass`}
           </button>
         </div>
       )}

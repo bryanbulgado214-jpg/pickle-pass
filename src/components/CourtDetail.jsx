@@ -6,6 +6,7 @@ import { Tag, Capacity, PersonAvatar } from './ui';
 import PaySheet from './PaySheet';
 import ReviewSheet from './ReviewSheet';
 import BookingCalendar from './BookingCalendar';
+import { CourtGalleryViewer } from './CourtGallery';
 
 export default function CourtDetail({ session, court, onBack }) {
   const { user } = useAuth();
@@ -117,6 +118,8 @@ export default function CourtDetail({ session, court, onBack }) {
       {court.verified && (
         <span className="verifiedTick">{"✓"} Verified Court</span>
       )}
+
+      <CourtGalleryViewer courtId={court.id} />
 
       {session.cap != null && (
         <Capacity

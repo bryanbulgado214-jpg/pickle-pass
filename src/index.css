@@ -687,5 +687,72 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .calConfirm { margin-top: 12px; background: #0F3D4E; border: 1px solid rgba(215,240,0,0.3); border-radius: 12px; padding: 12px; }
 .calConfirmText { color: #F2F6F1; font-weight: 600; font-size: 13px; text-align: center; }
 
+/* QR scanner */
+.scannerWrap { position: relative; border-radius: 14px; overflow: hidden; margin-top: 12px; }
+.scannerVideo { width: 100%; border-radius: 14px; background: #0A2E3C; display: block; }
+.scannerOverlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.scannerFrame { width: 180px; height: 180px; border: 2px solid rgba(215,240,0,0.7); border-radius: 16px;
+  box-shadow: 0 0 0 9999px rgba(10,46,60,0.5); }
+.scannerHint { text-align: center; color: #B8C9CF; font-size: 12.5px; margin-top: 10px; font-weight: 500; }
+.scanResult { text-align: center; background: #0F3D4E; border: 1px solid rgba(242,246,241,0.12);
+  border-radius: 18px; padding: 28px 20px; margin-top: 16px; }
+.scanResult.scanOk { border-color: rgba(57,217,138,0.4); }
+.scanResult.scanFail { border-color: rgba(255,107,87,0.4); }
+.scanResultIcon { font-size: 42px; margin-bottom: 10px; }
+.scanResultTitle { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.8px; }
+.scanOk .scanResultTitle { color: #39D98A; }
+.scanFail .scanResultTitle { color: #FF6B57; }
+.scanResultName { color: #F2F6F1; font-weight: 600; font-size: 16px; margin-top: 8px; }
+.scanResultSession { color: #B8C9CF; font-size: 13px; margin-top: 4px; }
+.scanResultMsg { color: #B8C9CF; font-size: 13px; margin-top: 8px; }
+.scannerCta { width: 100%; background: #178A63; border: 0; border-radius: 12px; padding: 13px; margin-bottom: 14px;
+  color: #F2F6F1; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px;
+  letter-spacing: 0.8px; cursor: pointer; }
+.scannerCta:hover { background: #1a9b71; }
+
+/* recurring booking toggle */
+.recurringToggle { display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer;
+  color: #B8C9CF; font-size: 13px; font-weight: 500; }
+.recurringToggle input { accent-color: #D7F000; width: 16px; height: 16px; cursor: pointer; }
+
+/* court photo gallery */
+.galleryGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+.galleryThumb { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; }
+.galleryThumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.galleryRemove { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(10,46,60,0.8); border: 1px solid rgba(255,107,87,0.5); color: #FF6B57;
+  font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.galleryAdd { aspect-ratio: 1; border-radius: 10px; border: 1px dashed rgba(242,246,241,0.25); background: #0A2E3C;
+  color: #B8C9CF; font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; }
+.galleryAdd:hover { border-color: rgba(215,240,0,0.5); color: #D7F000; }
+.galleryViewer { margin-top: 12px; border-radius: 14px; overflow: hidden; }
+.gallerySlide { position: relative; }
+.galleryMainImg { width: 100%; height: 160px; object-fit: cover; display: block; border-radius: 14px; }
+.galleryArrow { position: absolute; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(10,46,60,0.7); border: 1px solid rgba(242,246,241,0.25); color: #F2F6F1;
+  font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.galleryPrev { left: 6px; }
+.galleryNext { right: 6px; }
+.galleryDots { display: flex; gap: 5px; justify-content: center; margin-top: 8px; }
+.galleryDot { width: 7px; height: 7px; border-radius: 50%; border: 0; background: rgba(242,246,241,0.25); cursor: pointer; padding: 0; }
+.galleryDot.active { background: #D7F000; }
+
+/* referral */
+.referralCard { background: linear-gradient(135deg, #178A63, #0E5A42); border-radius: 18px;
+  padding: 20px; text-align: center; margin-top: 12px; }
+.referralCodeLabel { color: rgba(242,246,241,0.7); font-size: 12px; font-weight: 600; letter-spacing: 1px;
+  font-family: 'Barlow Condensed', sans-serif; }
+.referralCode { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px;
+  letter-spacing: 3px; color: #D7F000; margin: 8px 0 14px; }
+.referralBtns { display: flex; gap: 8px; }
+.referralBtns .cta { margin-top: 0; }
+.referralBtns .ghostBtn { border-color: rgba(242,246,241,0.35); color: #F2F6F1; }
+.referralRow { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: #0F3D4E; border: 1px solid rgba(242,246,241,0.1); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 8px; }
+.referralRowInfo { flex: 1; }
+.referralReward { color: #39D98A; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+
 @media (prefers-reduced-motion: reduce) { .capFill { transition: none; } }
 @media (max-width: 430px) { .phone { height: 84vh; border-radius: 24px; } }

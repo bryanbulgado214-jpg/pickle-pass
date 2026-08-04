@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
 import { Tag, Ball, Capacity, PersonAvatar } from './ui';
 import { LocationPicker } from './TileMap';
+import { CourtGalleryUpload } from './CourtGallery';
 
 function CourtSwitcher({ myCourts, activeId, onSwitch }) {
   if (myCourts.length < 2) return null;
@@ -76,7 +77,7 @@ export function OwnerVerifyScreen({ court, myCourts, onSwitchCourt, onSubmitted,
   );
 }
 
-export function OwnerHome({ court, myCourts, activeOwnerCourtId, onSwitchCourt }) {
+export function OwnerHome({ court, myCourts, activeOwnerCourtId, onSwitchCourt, onOpenScanner }) {
   const [sessions, setSessions] = useState([]);
   const [participants, setParticipants] = useState({});
   const [loading, setLoading] = useState(true);
@@ -124,6 +125,10 @@ export function OwnerHome({ court, myCourts, activeOwnerCourtId, onSwitchCourt }
         <div className="sub">Owner console {"·"} {court?.town} {"·"} <span className="verifiedTick">{"✓"} Verified</span></div>
       </div>
 
+      <button className="scannerCta" onClick={onOpenScanner}>
+        {"📷"} Scan Check-In QR
+      </button>
+
       {loading && <div className="empty"><p style={{ color: C.sand }}>Loading sessions...</p></div>}
 
       {!loading && sessions.length === 0 && (
@@ -157,6 +162,8 @@ export function OwnerHome({ court, myCourts, activeOwnerCourtId, onSwitchCourt }
           </div>
         );
       })}
+
+      {court && <CourtGalleryUpload courtId={court.id} />}
     </div>
   );
 }

@@ -20,6 +20,9 @@ import AdminConsole from './components/AdminConsole';
 import { OwnerVerifyScreen, OwnerHome, OwnerNew, OwnerEarnings } from './components/OwnerScreens';
 import OwnerAnalytics from './components/OwnerAnalytics';
 import ChatScreen from './components/ChatScreen';
+import QRScanner from './components/QRScanner';
+import ReferralScreen from './components/ReferralScreen';
+import SessionReminders from './components/SessionReminders';
 
 function AppInner() {
   const { user, profile, loading, signOut } = useAuth();
@@ -119,6 +122,8 @@ function AppInner() {
 
   function renderBody() {
     if (overlay === 'chat') return <ChatScreen onBack={closeOverlay} onOpenProfile={(id) => openOverlay('playerProfile', id)} />;
+    if (overlay === 'scanner') return <QRScanner onBack={closeOverlay} />;
+    if (overlay === 'referral') return <ReferralScreen onBack={closeOverlay} />;
     if (overlay === 'network') return <NetworkScreen onBack={closeOverlay} onOpenProfile={(id) => openOverlay('playerProfile', id)} />;
     if (overlay === 'leaderboard') return <LeaderboardScreen onBack={closeOverlay} />;
     if (overlay === 'playerProfile') return <PlayerProfileScreen profileId={overlayData} onBack={closeOverlay} />;
@@ -145,7 +150,7 @@ function AppInner() {
           />
         );
       }
-      if (ownerTab === 'home') return <OwnerHome court={activeCourt} myCourts={myCourts} activeOwnerCourtId={activeOwnerCourtId} onSwitchCourt={setActiveOwnerCourtId} />;
+      if (ownerTab === 'home') return <OwnerHome court={activeCourt} myCourts={myCourts} activeOwnerCourtId={activeOwnerCourtId} onSwitchCourt={setActiveOwnerCourtId} onOpenScanner={() => openOverlay('scanner')} />;
       if (ownerTab === 'analytics') return <OwnerAnalytics court={activeCourt} />;
       if (ownerTab === 'new') return <OwnerNew courtId={activeCourt.id} onPost={() => setOwnerTab('home')} />;
       if (ownerTab === 'earnings') return <OwnerEarnings />;
@@ -161,6 +166,7 @@ function AppInner() {
           onOpenNetwork={() => openOverlay('network')}
           onOpenLeaderboard={() => openOverlay('leaderboard')}
           onOpenChat={() => openOverlay('chat')}
+          onOpenReferral={() => openOverlay('referral')}
         />
       );
     }
@@ -224,6 +230,7 @@ function AppInner() {
           </div>
         )}
         {renderBody()}
+        <SessionReminders userId={user.id} />
       </div>
 
       <div className="nav">
