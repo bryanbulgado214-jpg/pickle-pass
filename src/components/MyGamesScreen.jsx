@@ -18,6 +18,20 @@ function QRCanvas({ value, size = 70 }) {
   return <canvas ref={canvasRef} className="qrCanvas" />;
 }
 
+function QRExpanded({ value, label, onClose }) {
+  return (
+    <div className="qrExpandedScrim" onClick={onClose}>
+      <div className="qrExpandedCard" onClick={(e) => e.stopPropagation()}>
+        <div className="h2" style={{ margin: '0 0 4px', textAlign: 'center' }}>CHECK-IN QR</div>
+        <div className="cardTitle" style={{ textAlign: 'center', marginBottom: 12 }}>{label}</div>
+        <QRCanvas value={value} size={200} />
+        <div className="sub" style={{ textAlign: 'center', marginTop: 10 }}>Show this to the court owner to check in</div>
+        <button className="cta" onClick={onClose} style={{ marginTop: 14 }}>Done</button>
+      </div>
+    </div>
+  );
+}
+
 export default function MyGamesScreen() {
   const { user } = useAuth();
   const [confirmed, setConfirmed] = useState([]);
@@ -25,6 +39,7 @@ export default function MyGamesScreen() {
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedQR, setExpandedQR] = useState(null);
 
   useEffect(() => {
     loadMyGames();
@@ -107,18 +122,26 @@ export default function MyGamesScreen() {
         </div>
       )}
 
-      {confirmed.map((g) => (
-        <div key={g.participantId} className="ticket">
-          <div className="ticketTop">
-            <div>
-              <div className="cardTitle">{g.session.label || 'Session'}</div>
-              <div className="cardMeta">{g.court?.name} {g.session.schedule_text ? `· ${g.session.schedule_text}` : ''}</div>
+      {confirmed.map((g) => {
+        const qrValue = `pp:checkin:${g.session.id}:${g.participantId}`;
+        return (
+          <div key={g.participantId} className="ticket">
+            <div className="ticketTop">
+              <div>
+                <div className="cardTitle">{g.session.label || 'Session'}</div>
+                <div className="cardMeta">{g.court?.name} {g.session.schedule_text ? `· ${g.session.schedule_text}` : ''}</div>
+                <button className="linkBtn small" onClick={() => setExpandedQR({ value: qrValue, label: g.session.label })}>
+                  Tap QR to enlarge
+                </button>
+              </div>
+              <button className="qrTapTarget" onClick={() => setExpandedQR({ value: qrValue, label: g.session.label })}>
+                <QRCanvas value={qrValue} />
+              </button>
             </div>
-            <QRCanvas value={`pp:checkin:${g.session.id}:${g.participantId}`} />
+            <button className="cancelLink" onClick={() => cancelSpot(g.participantId)}>Cancel my spot</button>
           </div>
-          <button className="cancelLink" onClick={() => cancelSpot(g.participantId)}>Cancel my spot</button>
-        </div>
-      ))}
+        );
+      })}
 
       {tournaments.map((t) => {
         const dateStr = t.event_date
@@ -151,6 +174,14 @@ export default function MyGamesScreen() {
             </div>
           ))}
         </>
+      )}
+
+      {expandedQR && (
+        <QRExpanded
+          value={expandedQR.value}
+          label={expandedQR.label}
+          onClose={() => setExpandedQR(null)}
+        />
       )}
     </div>
   );

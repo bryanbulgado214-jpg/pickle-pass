@@ -130,7 +130,7 @@ export const Capacity = ({ joined, walkIns, cap, big, roster, onOpenProfile }) =
   );
 };
 
-export const SearchFilterBar = ({ query, onQuery, typeFilter, onTypeFilter, sortBy, onSortBy }) => (
+export const SearchFilterBar = ({ query, onQuery, typeFilter, onTypeFilter, sortBy, onSortBy, skillFilter, onSkillFilter, timeFilter, onTimeFilter }) => (
   <div className="searchBar">
     <input
       className="searchInput"
@@ -150,6 +150,22 @@ export const SearchFilterBar = ({ query, onQuery, typeFilter, onTypeFilter, sort
         <option value="soonest">Soonest</option>
       </select>
     </div>
+    {onSkillFilter && onTimeFilter && (
+      <div className="filterRow" style={{ marginTop: 6 }}>
+        <select className="sortSelect" value={skillFilter || 'any'} onChange={(e) => onSkillFilter(e.target.value)} aria-label="Skill level">
+          <option value="any">Any Skill</option>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+        <select className="sortSelect" value={timeFilter || 'any'} onChange={(e) => onTimeFilter(e.target.value)} aria-label="Time of day">
+          <option value="any">Any Time</option>
+          <option value="morning">Morning (6-12)</option>
+          <option value="afternoon">Afternoon (12-17)</option>
+          <option value="evening">Evening (17+)</option>
+        </select>
+      </div>
+    )}
   </div>
 );
 

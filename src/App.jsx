@@ -25,6 +25,7 @@ import ReferralScreen from './components/ReferralScreen';
 import SessionReminders from './components/SessionReminders';
 import PaymentHistory from './components/PaymentHistory';
 import { OwnerPayoutLedger } from './components/PaymentHistory';
+import ClubScreen from './components/ClubScreen';
 
 function AppInner() {
   const { user, profile, loading, signOut } = useAuth();
@@ -133,6 +134,7 @@ function AppInner() {
     if (overlay === 'scanner') return <QRScanner onBack={closeOverlay} />;
     if (overlay === 'referral') return <ReferralScreen onBack={closeOverlay} />;
     if (overlay === 'payments') return <PaymentHistory onBack={closeOverlay} />;
+    if (overlay === 'clubs') return <ClubScreen onBack={closeOverlay} />;
     if (overlay === 'network') return <NetworkScreen onBack={closeOverlay} onOpenProfile={(id) => openOverlay('playerProfile', id)} />;
     if (overlay === 'leaderboard') return <LeaderboardScreen onBack={closeOverlay} />;
     if (overlay === 'playerProfile') return <PlayerProfileScreen profileId={overlayData} onBack={closeOverlay} />;
@@ -177,6 +179,7 @@ function AppInner() {
           onOpenChat={() => openOverlay('chat')}
           onOpenReferral={() => openOverlay('referral')}
           onOpenPayments={() => openOverlay('payments')}
+          onOpenClubs={() => openOverlay('clubs')}
           theme={theme}
           onToggleTheme={() => setTheme((t) => t === 'dark' ? 'light' : 'dark')}
         />

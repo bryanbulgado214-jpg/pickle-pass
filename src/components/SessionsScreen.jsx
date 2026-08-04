@@ -23,6 +23,8 @@ export default function SessionsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [sortBy, setSortBy] = useState('distance');
+  const [skillFilter, setSkillFilter] = useState('any');
+  const [timeFilter, setTimeFilter] = useState('any');
   const [tourneyOpen, setTourneyOpen] = useState(null);
 
   useEffect(() => {
@@ -87,6 +89,18 @@ export default function SessionsScreen() {
       const court = s.court;
       const hay = [s.label, court?.name, court?.town].filter(Boolean).join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
+    }
+    if (skillFilter !== 'any') {
+      const label = (s.label || '').toLowerCase();
+      if (skillFilter === 'beginner' && !label.includes('beginner') && !label.includes('newbie') && !label.includes('intro')) return false;
+      if (skillFilter === 'intermediate' && !label.includes('intermediate') && !label.includes('inter')) return false;
+      if (skillFilter === 'advanced' && !label.includes('advanced') && !label.includes('competitive') && !label.includes('pro')) return false;
+    }
+    if (timeFilter !== 'any' && s.scheduled_at) {
+      const hour = new Date(s.scheduled_at).getHours();
+      if (timeFilter === 'morning' && (hour < 6 || hour >= 12)) return false;
+      if (timeFilter === 'afternoon' && (hour < 12 || hour >= 17)) return false;
+      if (timeFilter === 'evening' && hour < 17) return false;
     }
     return true;
   });
@@ -157,6 +171,10 @@ export default function SessionsScreen() {
         onTypeFilter={setTypeFilter}
         sortBy={sortBy}
         onSortBy={setSortBy}
+        skillFilter={skillFilter}
+        onSkillFilter={setSkillFilter}
+        timeFilter={timeFilter}
+        onTimeFilter={setTimeFilter}
       />
 
       {loading && (

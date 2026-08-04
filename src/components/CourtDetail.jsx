@@ -182,12 +182,24 @@ export default function CourtDetail({ session, court, onBack }) {
         5% service fee ({"₱"}{serviceFee.toFixed(2)}) applies. Full refund if you cancel before the session starts.
       </div>
 
-      <ShareButton
-        title={session.label}
-        text={`Join ${session.label} at ${court.name}! ₱${fee} per person on Pickle Pass`}
-        url={window.location.origin}
-        label="Share Session"
-      />
+      <div className="detailActions">
+        <ShareButton
+          title={session.label}
+          text={`Join ${session.label} at ${court.name}! ₱${fee} per person on Pickle Pass`}
+          url={window.location.origin}
+          label="Share Session"
+        />
+        {court.lat && court.lng && (
+          <a
+            className="directionsBtn"
+            href={`https://www.google.com/maps/dir/?api=1&destination=${court.lat},${court.lng}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {"\u{1F4CD}"} Get Directions
+          </a>
+        )}
+      </div>
 
       {session.type === 'RENTAL' && (
         <BookingCalendar court={court} fee={fee} onBook={loadParticipants} />

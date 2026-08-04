@@ -827,5 +827,39 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .referralRowInfo { flex: 1; }
 .referralReward { color: #39D98A; font-weight: 700; font-size: 14px; flex-shrink: 0; }
 
+/* clubs */
+.clubRow { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; cursor: pointer;
+  background: var(--ink2); border: 1px solid var(--line-border); border-radius: 14px; padding: 12px 14px;
+  margin-bottom: 10px; color: inherit; font-family: inherit; }
+.clubRow:hover { border-color: rgba(215,240,0,0.4); }
+.clubRowIcon { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #178A63, #0E5A42);
+  display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 20px; flex-shrink: 0; }
+.clubHero { width: 80px; height: 80px; border-radius: 20px; background: linear-gradient(135deg, #178A63, #0E5A42);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+.clubInitial { color: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 36px; }
+[data-theme="light"] .clubRow { background: var(--ink); }
+
+/* directions button */
+.detailActions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.directionsBtn { display: inline-flex; align-items: center; gap: 6px; background: none;
+  border: 1px solid rgba(23,138,99,0.4); color: #178A63; border-radius: 10px;
+  padding: 8px 14px; font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 12.5px;
+  cursor: pointer; text-decoration: none; }
+.directionsBtn:hover { background: rgba(23,138,99,0.08); }
+
+/* QR expanded view */
+.qrTapTarget { background: none; border: 0; cursor: pointer; padding: 0; flex-shrink: 0; }
+.qrExpandedScrim { position: fixed; inset: 0; background: rgba(4,20,27,0.85); z-index: 50;
+  display: flex; align-items: center; justify-content: center; padding: 24px; }
+.qrExpandedCard { background: var(--ink); border: 1px solid var(--line-border); border-radius: 20px;
+  padding: 24px; text-align: center; max-width: 300px; width: 100%; }
+.qrExpandedCard canvas { display: block; margin: 0 auto; border-radius: 10px; }
+
+/* advanced filter row */
+.filterRow { display: flex; align-items: center; gap: 8px; }
+.filterRow + .filterRow { margin-top: 6px; }
+.filterRow .sortSelect { flex: 1; }
+
 @media (prefers-reduced-motion: reduce) { .capFill { transition: none; } }
 @media (max-width: 430px) { .phone { height: 84vh; border-radius: 24px; } }
