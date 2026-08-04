@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { C, LEAGUES, CURRENT_LEAGUE_INDEX } from '../lib/constants';
 import { PersonAvatar, CourtBackdrop } from './ui';
 
-export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenChat, onOpenReferral, onOpenPayments, onOpenClubs, theme, onToggleTheme }) {
+export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenReferral, onOpenPayments, onOpenClubs, theme, onToggleTheme }) {
   const { profile, updateProfile, signOut } = useAuth();
   const [connectionCount, setConnectionCount] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
@@ -102,11 +102,6 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenCh
       <button className="profileLinkRow" onClick={onOpenNetwork}>
         <span>Connections</span>
         <span className="profileLinkVal">{connectionCount} {"→"}</span>
-      </button>
-
-      <button className="profileLinkRow" onClick={onOpenChat}>
-        <span>{"\u{1F4AC}"} Messages</span>
-        <span className="profileLinkVal">{"→"}</span>
       </button>
 
       <button className="profileLinkRow" onClick={onOpenClubs}>

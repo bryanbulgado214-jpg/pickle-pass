@@ -107,6 +107,7 @@ function AppInner() {
   const playerNav = [
     ['feed', 'Feed', '\u{1F4F0}'],
     ['play', 'Play', paddle],
+    ['chat', 'Messages', '\u{1F4AC}'],
     ['map', 'Map', '\u{1F5FA}'],
     ['games', 'My Games', '\u{1F3AB}'],
     ['profile', 'Profile', '\u{1F464}'],
@@ -179,6 +180,7 @@ function AppInner() {
 
     if (tab === 'feed') return <FeedScreen />;
     if (tab === 'play') return <SessionsScreen />;
+    if (tab === 'chat') return <ChatScreen onBack={() => setTab('feed')} onOpenProfile={(id) => openOverlay('playerProfile', id)} />;
     if (tab === 'map') return <MapView onOpenCourt={(ct) => openOverlay('court', ct)} />;
     if (tab === 'games') return <MyGamesScreen />;
     if (tab === 'profile') {
@@ -186,7 +188,6 @@ function AppInner() {
         <ProfilePane
           onOpenNetwork={() => openOverlay('network')}
           onOpenLeaderboard={() => openOverlay('leaderboard')}
-          onOpenChat={() => openOverlay('chat')}
           onOpenReferral={() => openOverlay('referral')}
           onOpenPayments={() => openOverlay('payments')}
           onOpenClubs={() => openOverlay('clubs')}
