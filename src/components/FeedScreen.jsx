@@ -64,7 +64,7 @@ export default function FeedScreen({ onOpenProfile }) {
     const channel = supabase
       .channel('feed-realtime')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, () => {
-        setNewCount((c) => c + 1);
+        loadPosts();
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'posts' }, () => {
         loadPosts();
