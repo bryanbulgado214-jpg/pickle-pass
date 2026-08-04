@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
+import { LoadingBall } from './ui';
 
 const REWARD_POINTS = 50;
 
@@ -96,7 +97,7 @@ export default function ReferralScreen({ onBack }) {
       </div>
 
       <div className="h2">REFERRAL HISTORY</div>
-      {loading && <div className="sub">Loading...</div>}
+      {loading && <LoadingBall />}
       {!loading && referrals.length === 0 && (
         <div className="sub">No referrals yet. Share your code to start earning!</div>
       )}

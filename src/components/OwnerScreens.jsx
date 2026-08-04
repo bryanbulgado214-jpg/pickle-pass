@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
-import { Tag, Ball, Capacity, PersonAvatar } from './ui';
+import { Tag, Ball, Capacity, PersonAvatar, LoadingBall } from './ui';
 import { LocationPicker } from './TileMap';
 import { CourtGalleryUpload } from './CourtGallery';
 
@@ -129,7 +129,7 @@ export function OwnerHome({ court, myCourts, activeOwnerCourtId, onSwitchCourt, 
         {"📷"} Scan Check-In QR
       </button>
 
-      {loading && <div className="empty"><p style={{ color: C.sand }}>Loading sessions...</p></div>}
+      {loading && <LoadingBall text="Loading sessions…" />}
 
       {!loading && sessions.length === 0 && (
         <div className="empty">

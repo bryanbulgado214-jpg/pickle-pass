@@ -85,16 +85,24 @@ export const TileMap = ({ center, zoom, pins, pickable, onPick, className }) => 
   );
 };
 
-export const CourtsMap = ({ courts, userLocation, onOpen }) => {
+export const CourtsMap = ({ courts, userLocation, selectedId, onSelect, onDeselect }) => {
+  const selected = selectedId ? courts.find((c) => c.id === selectedId) : null;
+  const center = selected
+    ? { lat: selected.lat, lng: selected.lng }
+    : userLocation || (courts.length
+      ? { lat: courts.reduce((s, c) => s + c.lat, 0) / courts.length, lng: courts.reduce((s, c) => s + c.lng, 0) / courts.length }
+      : { lat: 10, lng: 20 });
   const points = courts.map((c) => ({ lat: c.lat, lng: c.lng }));
   if (userLocation) points.push(userLocation);
-  const center = userLocation || (courts.length
-    ? { lat: courts.reduce((s, c) => s + c.lat, 0) / courts.length, lng: courts.reduce((s, c) => s + c.lng, 0) / courts.length }
-    : { lat: 10, lng: 20 });
-  const zoom = fitZoom(points, 320, 260);
-  const pins = courts.map((ct) => ({ lat: ct.lat, lng: ct.lng, className: "court", label: ct.name, key: ct.id, onClick: () => onOpen(ct) }));
+  const zoom = selected ? 16 : fitZoom(points, 320, 260);
+  const pins = courts.map((ct) => ({
+    lat: ct.lat, lng: ct.lng,
+    className: "court" + (selectedId === ct.id ? " selected" : ""),
+    label: ct.name, key: ct.id,
+    onClick: () => onSelect(ct),
+  }));
   if (userLocation) pins.push({ lat: userLocation.lat, lng: userLocation.lng, className: "you", label: "You are here", key: "you" });
-  return <TileMap center={center} zoom={zoom} pins={pins} />;
+  return <TileMap center={center} zoom={zoom} pins={pins} pickable onPick={() => { if (selectedId) onDeselect(); }} />;
 };
 
 export const LocationPicker = ({ lat, lng, onChange }) => {

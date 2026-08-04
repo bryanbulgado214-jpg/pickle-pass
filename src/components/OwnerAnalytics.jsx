@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { C } from '../lib/constants';
+import { LoadingBall } from './ui';
 
 function MiniBar({ items, maxVal, barColor }) {
   const max = maxVal || Math.max(...items.map((i) => i.value), 1);
@@ -61,7 +62,7 @@ export default function OwnerAnalytics({ court }) {
           <div className="h1">ANALYTICS</div>
           <div className="sub">{court?.name}</div>
         </div>
-        <p style={{ color: C.sand, fontSize: 13 }}>Loading analytics...</p>
+        <LoadingBall text="Loading analytics…" />
       </div>
     );
   }

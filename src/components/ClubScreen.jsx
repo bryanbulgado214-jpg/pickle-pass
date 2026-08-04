@@ -2,29 +2,41 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
-import { PersonAvatar } from './ui';
+import { PersonAvatar, LoadingBall } from './ui';
 
 function ClubForm({ onCreated, onCancel }) {
   const { user } = useAuth();
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
-    const { data, error } = await supabase.from('clubs').insert({
+    setError(null);
+    const { data, error: insertErr } = await supabase.from('clubs').insert({
       name: name.trim(),
       description: desc.trim(),
       owner_id: user.id,
     }).select().single();
-    if (!error && data) {
-      await supabase.from('club_members').insert({
+    if (insertErr) {
+      setError(insertErr.message);
+      setSaving(false);
+      return;
+    }
+    if (data) {
+      const { error: memberErr } = await supabase.from('club_members').insert({
         club_id: data.id,
         profile_id: user.id,
         role: 'owner',
       });
+      if (memberErr) {
+        setError(memberErr.message);
+        setSaving(false);
+        return;
+      }
       onCreated();
     }
     setSaving(false);
@@ -35,6 +47,7 @@ function ClubForm({ onCreated, onCancel }) {
       <button className="back" onClick={onCancel}>{"← Back"}</button>
       <div className="h1">CREATE A CLUB</div>
       <div className="sub">Start a pickleball group on Siquijor</div>
+      {error && <div className="errorBanner">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="formRow" style={{ marginTop: 16 }}>
           <label>CLUB NAME</label>
@@ -169,7 +182,7 @@ export default function ClubScreen({ onBack }) {
         + Create a Club
       </button>
 
-      {loading && <div className="sub">Loading clubs...</div>}
+      {loading && <LoadingBall text="Loading clubs…" />}
 
       {!loading && clubs.length === 0 && (
         <div className="empty">

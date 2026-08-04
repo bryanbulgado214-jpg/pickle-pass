@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
-import { PersonAvatar, Ball } from './ui';
+import { PersonAvatar, Ball, LoadingBall } from './ui';
 import ChatThread from './ChatThread';
 
 export default function ChatScreen({ onBack, onOpenProfile }) {
@@ -72,7 +72,7 @@ export default function ChatScreen({ onBack, onOpenProfile }) {
         <div className="sub">Chat with your connections</div>
       </div>
 
-      {loading && <p style={{ color: C.sand, fontSize: 13 }}>Loading...</p>}
+      {loading && <LoadingBall text="Loading chats…" />}
 
       {!loading && conversations.length === 0 && (
         <div className="empty">

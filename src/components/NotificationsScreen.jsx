@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
+import { LoadingBall } from './ui';
 
 export default function NotificationsScreen({ onBack }) {
   const { user } = useAuth();
@@ -47,7 +48,7 @@ export default function NotificationsScreen({ onBack }) {
         )}
       </div>
 
-      {loading && <p style={{ color: C.sand, fontSize: 13 }}>Loading…</p>}
+      {loading && <LoadingBall />}
 
       {!loading && notifs.length === 0 && (
         <div className="empty">

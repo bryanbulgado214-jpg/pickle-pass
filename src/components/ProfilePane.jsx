@@ -9,6 +9,7 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenCh
   const [connectionCount, setConnectionCount] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -35,19 +36,25 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenCh
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setUploadError(null);
     const ext = file.name.split('.').pop();
     const path = `${profile.id}/avatar.${ext}`;
     const { error: upErr } = await supabase.storage
       .from('profile-photos')
       .upload(path, file, { upsert: true });
     if (upErr) {
+      setUploadError('Photo upload failed — storage may not be configured yet.');
       setUploading(false);
       return;
     }
     const { data: urlData } = supabase.storage
       .from('profile-photos')
       .getPublicUrl(path);
-    await updateProfile({ photo_url: urlData.publicUrl });
+    try {
+      await updateProfile({ photo_url: `${urlData.publicUrl}?t=${Date.now()}` });
+    } catch (err) {
+      setUploadError('Photo saved but profile update failed.');
+    }
     setUploading(false);
   }
 
@@ -65,6 +72,7 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenCh
         </div>
       </div>
 
+      {uploadError && <div className="errorBanner">{uploadError}</div>}
       <div className="profileNameRow">
         <span className="profileName">{profile.full_name}</span>
       </div>

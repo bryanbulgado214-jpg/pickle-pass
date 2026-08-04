@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
-import { Ball, Tag } from './ui';
+import { Ball, Tag, LoadingBall } from './ui';
 import QRCode from 'qrcode';
 
 function QRCanvas({ value, size = 70 }) {
@@ -98,7 +98,7 @@ export default function MyGamesScreen() {
           <div className="h1">MY GAMES</div>
           <div className="sub">Your upcoming sessions</div>
         </div>
-        <p style={{ color: C.sand, fontSize: 13 }}>Loading...</p>
+        <LoadingBall />
       </div>
     );
   }

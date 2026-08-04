@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
-import { Tag, Capacity, PersonAvatar } from './ui';
+import { Tag, Capacity, PersonAvatar, LoadingBall } from './ui';
 import PaySheet from './PaySheet';
 import ReviewSheet from './ReviewSheet';
 import BookingCalendar from './BookingCalendar';
@@ -145,7 +145,7 @@ export default function CourtDetail({ session, court, onBack }) {
       </div>
 
       {loading ? (
-        <p style={{ color: C.sand, marginTop: 16, fontSize: 13 }}>Loading…</p>
+        <LoadingBall />
       ) : myStatus === 'confirmed' ? (
         <>
           <div className="joinedBanner">

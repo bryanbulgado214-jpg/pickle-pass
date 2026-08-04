@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
 import { renderWithMentions } from '../lib/utils';
-import { PersonAvatar } from './ui';
+import { PersonAvatar, LoadingBall } from './ui';
 
 export default function CommentsSheet({ postId, onClose }) {
   const { user } = useAuth();
@@ -43,7 +43,7 @@ export default function CommentsSheet({ postId, onClose }) {
         <div className="sheetHandle" />
         <h3 className="h1" style={{ fontSize: 18 }}>Comments</h3>
         <div className="commentsList">
-          {loading && <p style={{ color: C.sand, fontSize: 13 }}>Loading…</p>}
+          {loading && <LoadingBall />}
           {!loading && comments.length === 0 && (
             <p style={{ color: C.sand, fontSize: 13 }}>No comments yet. Be the first!</p>
           )}

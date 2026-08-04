@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
-import { Ball } from './ui';
+import { Ball, LoadingBall } from './ui';
 import { CourtsMap } from './TileMap';
 import { haversineKm } from '../lib/utils';
 
@@ -12,6 +12,7 @@ export default function MapView({ onOpenCourt }) {
   const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(
@@ -56,15 +57,23 @@ export default function MapView({ onOpenCourt }) {
 
       {!loading && courts.length > 0 && (
         <div className="mapWrap">
-          <CourtsMap courts={courtsWithDist} userLocation={userLocation} onOpen={onOpenCourt} />
+          <CourtsMap
+            courts={courtsWithDist}
+            userLocation={userLocation}
+            selectedId={selectedId}
+            onSelect={(ct) => setSelectedId(ct.id)}
+            onDeselect={() => setSelectedId(null)}
+          />
         </div>
       )}
 
-      {loading && (
-        <div className="empty">
-          <p style={{ color: C.sand }}>Loading courts...</p>
-        </div>
+      {selectedId && (
+        <button className="ghostBtn" style={{ marginBottom: 8, width: '100%' }} onClick={() => setSelectedId(null)}>
+          Show All Courts
+        </button>
       )}
+
+      {loading && <LoadingBall text="Loading courts…" />}
 
       {!loading && courts.length === 0 && (
         <div className="empty">
@@ -73,8 +82,8 @@ export default function MapView({ onOpenCourt }) {
         </div>
       )}
 
-      {courtsWithDist.map((ct) => (
-        <div key={ct.id} className="mapRow">
+      {courtsWithDist.filter((ct) => !selectedId || ct.id === selectedId).map((ct) => (
+        <button key={ct.id} className="mapRow" onClick={() => onOpenCourt(ct)}>
           <div className="mapRowL">
             <Ball size={14} />
             <div>
@@ -89,16 +98,8 @@ export default function MapView({ onOpenCourt }) {
               </div>
             </div>
           </div>
-          <a
-            className="dirBtn"
-            href={`https://www.google.com/maps/dir/?api=1&destination=${ct.lat},${ct.lng}`}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            Directions {"↗"}
-          </a>
-        </div>
+          <span className="profileLinkVal">{"→"}</span>
+        </button>
       ))}
     </div>
   );

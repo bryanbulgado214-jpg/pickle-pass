@@ -10,6 +10,7 @@ export default function PostComposer({ onPostCreated }) {
   const [mediaPreview, setMediaPreview] = useState(null);
   const [posting, setPosting] = useState(false);
   const [justPosted, setJustPosted] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -21,6 +22,7 @@ export default function PostComposer({ onPostCreated }) {
   const handlePost = async () => {
     if (!caption.trim() && !media) return;
     setPosting(true);
+    setError(null);
 
     let mediaUrl = null;
     let mediaType = null;
@@ -32,15 +34,18 @@ export default function PostComposer({ onPostCreated }) {
       const { error: uploadErr } = await supabase.storage
         .from('post-media')
         .upload(path, media);
-      if (!uploadErr) {
-        const { data: urlData } = supabase.storage
-          .from('post-media')
-          .getPublicUrl(path);
-        mediaUrl = urlData.publicUrl;
+      if (uploadErr) {
+        setError('Photo upload failed — storage may not be configured yet.');
+        setPosting(false);
+        return;
       }
+      const { data: urlData } = supabase.storage
+        .from('post-media')
+        .getPublicUrl(path);
+      mediaUrl = urlData.publicUrl;
     }
 
-    const { error } = await supabase.from('posts').insert({
+    const { error: postErr } = await supabase.from('posts').insert({
       profile_id: user.id,
       kind: media ? 'media' : 'checkin',
       text_content: caption.trim() || null,
@@ -50,7 +55,11 @@ export default function PostComposer({ onPostCreated }) {
     });
 
     setPosting(false);
-    if (!error) {
+    if (postErr) {
+      setError(postErr.message);
+      return;
+    }
+    if (!postErr) {
       setCaption('');
       setMedia(null);
       setMediaPreview(null);
@@ -94,6 +103,7 @@ export default function PostComposer({ onPostCreated }) {
           {posting ? 'Posting…' : 'Post'}
         </button>
       </div>
+      {error && <div className="errorBanner" style={{ margin: '8px 0 0' }}>{error}</div>}
       {justPosted && (
         <div className="composerNote">{"✅"} Posted!</div>
       )}

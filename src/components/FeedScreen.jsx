@@ -5,6 +5,7 @@ import { C } from '../lib/constants';
 import FeedPost from './FeedPost';
 import PostComposer from './PostComposer';
 import CommentsSheet from './CommentsSheet';
+import { LoadingBall } from './ui';
 
 export default function FeedScreen({ onOpenProfile }) {
   const { user } = useAuth();
@@ -108,11 +109,7 @@ export default function FeedScreen({ onOpenProfile }) {
 
       <PostComposer onPostCreated={loadPosts} />
 
-      {loading && (
-        <div className="empty">
-          <p style={{ color: C.sand }}>Loading feed…</p>
-        </div>
-      )}
+      {loading && <LoadingBall text="Loading feed…" />}
 
       {!loading && posts.length === 0 && (
         <div className="empty">

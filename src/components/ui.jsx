@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { C, FONT_DISPLAY } from '../lib/constants';
 import { colorForName } from '../lib/utils';
 
@@ -28,6 +29,13 @@ export const Ball = ({ size = 18 }) => (
   </svg>
 );
 
+export const LoadingBall = ({ text = 'Loading…' }) => (
+  <div className="loadingBall">
+    <div className="ballBounce"><Ball size={28} /></div>
+    <div className="loadLabel">{text}</div>
+  </div>
+);
+
 export const Tag = ({ children, tone }) => {
   const tones = {
     open: { bg: "rgba(215,240,0,0.14)", fg: C.ball },
@@ -44,14 +52,10 @@ export const Tag = ({ children, tone }) => {
   return <span className="tag" style={{ background: t.bg, color: t.fg }}>{children}</span>;
 };
 
-export const PersonAvatar = ({ name, photo, size = 44 }) =>
-  photo ? (
-    <img
-      src={photo}
-      alt=""
-      style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", display: "block" }}
-    />
-  ) : (
+export const PersonAvatar = ({ name, photo, size = 44 }) => {
+  const [broken, setBroken] = useState(false);
+  const initial = (name || "?").trim().charAt(0).toUpperCase();
+  const fallback = (
     <div
       style={{
         width: size, height: size, borderRadius: "50%", background: colorForName(name),
@@ -59,9 +63,19 @@ export const PersonAvatar = ({ name, photo, size = 44 }) =>
         color: "#fff", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: size * 0.42, flexShrink: 0,
       }}
     >
-      {(name || "?").trim().charAt(0).toUpperCase()}
+      {initial}
     </div>
   );
+  if (!photo || broken) return fallback;
+  return (
+    <img
+      src={photo}
+      alt=""
+      onError={() => setBroken(true)}
+      style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", display: "block" }}
+    />
+  );
+};
 
 export const PhotoLightbox = ({ url, onClose }) => (
   <div className="lightboxScrim" onClick={onClose}>

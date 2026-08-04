@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
-import { Tag, Ball } from './ui';
+import { Tag, Ball, LoadingBall } from './ui';
 
 export default function AdminConsole({ onBack }) {
   const { profile } = useAuth();
@@ -82,7 +82,7 @@ export default function AdminConsole({ onBack }) {
         </button>
       </div>
 
-      {loading && <p style={{ color: C.sand, fontSize: 13 }}>Loading...</p>}
+      {loading && <LoadingBall />}
 
       {!loading && tab === 'posts' && (
         posts.length === 0 ? (

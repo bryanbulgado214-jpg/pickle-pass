@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
+import { LoadingBall } from './ui';
 
 export default function PaymentHistory({ onBack }) {
   const { user } = useAuth();
@@ -109,7 +110,7 @@ export default function PaymentHistory({ onBack }) {
         </div>
       </div>
 
-      {loading && <div className="sub" style={{ marginTop: 12 }}>Loading...</div>}
+      {loading && <LoadingBall />}
 
       {!loading && payments.length === 0 && (
         <div className="empty">
@@ -207,7 +208,7 @@ export function OwnerPayoutLedger() {
         </div>
       </div>
 
-      {loading && <div className="sub" style={{ marginTop: 12 }}>Loading...</div>}
+      {loading && <LoadingBall />}
 
       {!loading && sessions.length === 0 && (
         <div className="empty">

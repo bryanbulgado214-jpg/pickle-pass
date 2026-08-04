@@ -11,7 +11,8 @@
   --line-border: rgba(10,46,60,0.1); --line-border2: rgba(10,46,60,0.12);
 }
 
-body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; transition: background 0.3s, color 0.3s; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; transition: background 0.3s, color 0.3s; overflow: hidden; }
+.appShell { height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
 * { box-sizing: border-box; margin: 0; }
 .stage {
@@ -218,7 +219,7 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
   background: #F2F6F1; padding: 6px; border-radius: 6px; }
 .qr span { background: #0A2E3C; }
 
-.nav { display: flex; border-top: 1px solid var(--line-border); background: var(--ink2); }
+.nav { display: flex; border-top: 1px solid var(--line-border); background: var(--ink2); flex-shrink: 0; }
 .nav button { flex: 1; background: none; border: 0; color: var(--sand); padding: 10px 4px 14px; cursor: pointer;
   font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; display: flex; flex-direction: column; gap: 3px; align-items: center; }
 .nav .navOn { color: #D7F000; }
@@ -484,7 +485,8 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .tileImg { position: absolute; width: 256px; height: 256px; pointer-events: none; }
 .tilePin { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #D7F000; border: 2px solid #0A2E3C;
   transform: translate(-50%, -50%); z-index: 2; cursor: pointer; }
-.tilePin.court { background: #178A63; }
+.tilePin.court { background: #178A63; transition: transform 0.2s, box-shadow 0.2s; }
+.tilePin.court.selected { background: #D7F000; transform: translate(-50%, -50%) scale(1.8); box-shadow: 0 0 12px rgba(215,240,0,0.6); z-index: 10; }
 .tilePin.you { background: #D7F000; box-shadow: 0 0 8px rgba(215,240,0,0.5); }
 .tilePin.big { width: 20px; height: 20px; }
 .tileAttribution { position: absolute; bottom: 2px; right: 6px; font-size: 9px; color: rgba(255,255,255,0.5); z-index: 3; }
@@ -861,5 +863,19 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .filterRow + .filterRow { margin-top: 6px; }
 .filterRow .sortSelect { flex: 1; }
 
-@media (prefers-reduced-motion: reduce) { .capFill { transition: none; } }
+/* loading ball */
+.loadingBall { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px 0; }
+.loadingBall .ballBounce { width: 28px; height: 28px; animation: bounce 0.6s ease-in-out infinite alternate; }
+.loadingBall .loadLabel { color: var(--sand); font-size: 12.5px; font-weight: 500; }
+@keyframes bounce { 0% { transform: translateY(0) scale(1, 1); } 100% { transform: translateY(-18px) scale(0.95, 1.05); } }
+
+/* court profile */
+.courtProfileHero { text-align: center; padding: 20px 0 8px; }
+.courtRatingBig { font-size: 18px; font-weight: 600; color: #D4AF37; margin-top: 6px; }
+.courtRatingBig .sub { font-size: 12px; color: var(--sand); font-weight: 400; }
+.courtDesc { font-size: 13.5px; color: var(--sand); line-height: 1.5; margin: 12px 0 4px; }
+.courtSessionRow { display: flex; align-items: center; justify-content: space-between; width: 100%; background: var(--ink2); border: 1px solid var(--line-border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; text-align: left; color: var(--text); font-family: inherit; font-size: inherit; }
+.courtSessionRow:active { opacity: 0.85; }
+
+@media (prefers-reduced-motion: reduce) { .capFill { transition: none; } .loadingBall .ballBounce { animation: none; } }
 @media (max-width: 430px) { .phone { height: 84vh; border-radius: 24px; } }

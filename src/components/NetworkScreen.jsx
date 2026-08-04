@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
-import { PersonAvatar, Ball } from './ui';
+import { PersonAvatar, Ball, LoadingBall } from './ui';
 
 export default function NetworkScreen({ onBack, onOpenProfile }) {
   const { user } = useAuth();
@@ -114,7 +114,7 @@ export default function NetworkScreen({ onBack, onOpenProfile }) {
         ))}
       </div>
 
-      {loading && <p style={{ color: C.sand, fontSize: 13 }}>Loading...</p>}
+      {loading && <LoadingBall />}
 
       {!loading && tab === 'connections' && (
         connections.length === 0 ? (

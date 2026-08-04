@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { supabase } from './lib/supabase';
 import { C } from './lib/constants';
 import { LOGO_ICON } from './lib/logos';
-import { PersonAvatar, NotificationBell, PaddleIcon } from './components/ui';
+import { PersonAvatar, NotificationBell, PaddleIcon, LoadingBall } from './components/ui';
 import AuthScreen from './components/AuthScreen';
 import FeedScreen from './components/FeedScreen';
 import SessionsScreen from './components/SessionsScreen';
@@ -26,6 +26,8 @@ import SessionReminders from './components/SessionReminders';
 import PaymentHistory from './components/PaymentHistory';
 import { OwnerPayoutLedger } from './components/PaymentHistory';
 import ClubScreen from './components/ClubScreen';
+import CourtProfile from './components/CourtProfile';
+import CourtDetail from './components/CourtDetail';
 
 function AppInner() {
   const { user, profile, loading, signOut } = useAuth();
@@ -85,8 +87,8 @@ function AppInner() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: C.sand, fontSize: 14 }}>Loading…</p>
+      <div className="appShell" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingBall />
       </div>
     );
   }
@@ -139,6 +141,8 @@ function AppInner() {
     if (overlay === 'leaderboard') return <LeaderboardScreen onBack={closeOverlay} />;
     if (overlay === 'playerProfile') return <PlayerProfileScreen profileId={overlayData} onBack={closeOverlay} />;
     if (overlay === 'tournament') return <TournamentDetail tournament={overlayData.tournament} court={overlayData.court} onBack={closeOverlay} />;
+    if (overlay === 'court') return <CourtProfile court={overlayData} onBack={closeOverlay} onOpenSession={(sess, ct) => openOverlay('sessionDetail', { session: sess, court: ct })} />;
+    if (overlay === 'sessionDetail') return <CourtDetail session={overlayData.session} court={overlayData.court} onBack={closeOverlay} />;
     if (overlay === 'admin' && profile?.is_admin) return <AdminConsole onBack={closeOverlay} />;
 
     if (showNotifications) return <NotificationsScreen onBack={() => { setShowNotifications(false); loadUnreadCount(); }} />;
@@ -192,7 +196,7 @@ function AppInner() {
   const activeNavId = mode === 'owner' ? ownerTab : tab;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="appShell">
       <div className="topBar">
         <div className="brand">
           <img src={LOGO_ICON} alt="" className="brandIcon" />

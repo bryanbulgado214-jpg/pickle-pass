@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { PersonAvatar, CourtBackdrop } from './ui';
+import { PersonAvatar, CourtBackdrop, LoadingBall } from './ui';
 
 export default function PlayerProfileScreen({ profileId, onBack }) {
   const { user } = useAuth();
@@ -91,7 +91,7 @@ export default function PlayerProfileScreen({ profileId, onBack }) {
     return (
       <div className="pane">
         <button className="back" onClick={onBack}>{"←"} Back</button>
-        <p style={{ color: '#B8C9CF', fontSize: 13 }}>Loading...</p>
+        <LoadingBall />
       </div>
     );
   }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
+import { LoadingBall } from './ui';
 
 const TIME_SLOTS = [
   '6:00 AM', '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM',
@@ -204,7 +205,7 @@ export default function BookingCalendar({ court, fee, onBook }) {
         </div>
       )}
 
-      {loading && <div className="sub" style={{ marginTop: 8 }}>Loading availability...</div>}
+      {loading && <LoadingBall text="Loading availability…" />}
     </div>
   );
 }

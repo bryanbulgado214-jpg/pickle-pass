@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
 import { haversineKm } from '../lib/utils';
-import { SearchFilterBar } from './ui';
+import { SearchFilterBar, LoadingBall } from './ui';
 import SessionCard from './SessionCard';
 import CourtDetail from './CourtDetail';
 import TournamentCard from './TournamentCard';
@@ -37,17 +37,21 @@ export default function SessionsScreen() {
   const loadSessions = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const { data: sessData, error: err } = await supabase
-      .from('sessions')
-      .select(`
-        *,
-        court:court_id(*)
-      `)
-      .order('created_at', { ascending: false });
 
-    if (err) { setError(err.message); setLoading(false); return; }
+    const [sessResult, tourneyResult] = await Promise.all([
+      supabase
+        .from('sessions')
+        .select('*, court:court_id(*)')
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('tournaments')
+        .select('*, court:court_id(id, name, town, verified)')
+        .order('created_at', { ascending: false }),
+    ]);
 
-    const sessionList = sessData || [];
+    if (sessResult.error) { setError(sessResult.error.message); setLoading(false); return; }
+
+    const sessionList = sessResult.data || [];
     const courtMap = {};
     sessionList.forEach((s) => {
       if (s.court) courtMap[s.court.id] = s.court;
@@ -66,15 +70,10 @@ export default function SessionsScreen() {
       });
     }
 
-    const { data: tourneyData } = await supabase
-      .from('tournaments')
-      .select('*, court:court_id(id, name, town, verified)')
-      .order('created_at', { ascending: false });
-
     setSessions(sessionList);
     setCourts(courtMap);
     setParticipants(partMap);
-    setTournaments(tourneyData || []);
+    setTournaments(tourneyResult.data || []);
     setLoading(false);
   }, []);
 
@@ -177,11 +176,7 @@ export default function SessionsScreen() {
         onTimeFilter={setTimeFilter}
       />
 
-      {loading && (
-        <div className="empty">
-          <p style={{ color: C.sand }}>Loading sessions…</p>
-        </div>
-      )}
+      {loading && <LoadingBall text="Loading sessions…" />}
 
       {!loading && filtered.length === 0 && (
         <div className="empty">
