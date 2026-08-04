@@ -12,6 +12,7 @@ export default function AuthScreen() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [confirmSent, setConfirmSent] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,6 +56,50 @@ export default function AuthScreen() {
           >
             Back to Login
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!showForm) {
+    return (
+      <div className="auth">
+        <div className="authHero">
+          <div className="authCourtLines" />
+          <div className="authBrand">
+            <img src={LOGO_LOCKUP} alt="Pickle Pass" className="authLogoImg" />
+          </div>
+        </div>
+        <div className="landingHero">
+          <div className="landingTagline">Your Pickleball Community on Siquijor Island</div>
+          <div className="landingDesc">
+            Find open play sessions, book courts, join clubs, and connect with players across the island.
+          </div>
+          <div className="featureGrid">
+            <div className="featureCard">
+              <div className="featureEmoji">{"🏓"}</div>
+              <div className="featureLabel">Find Open Play</div>
+            </div>
+            <div className="featureCard">
+              <div className="featureEmoji">{"📅"}</div>
+              <div className="featureLabel">Book Courts</div>
+            </div>
+            <div className="featureCard">
+              <div className="featureEmoji">{"🏛️"}</div>
+              <div className="featureLabel">Join Clubs</div>
+            </div>
+            <div className="featureCard">
+              <div className="featureEmoji">{"📊"}</div>
+              <div className="featureLabel">Track Stats</div>
+            </div>
+          </div>
+          <button className="cta" onClick={() => setShowForm(true)}>Get Started</button>
+          <div className="authSwap" style={{ marginTop: 16 }}>
+            Already have an account?{' '}
+            <button className="linkBtn" onClick={() => { setShowForm(true); setView('login'); }}>
+              Log in
+            </button>
+          </div>
         </div>
       </div>
     );

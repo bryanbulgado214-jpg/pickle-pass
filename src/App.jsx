@@ -254,7 +254,9 @@ function AppInner() {
             </div>
           </div>
         )}
-        {renderBody()}
+        <div className="screenFade" key={overlay || (showNotifications ? 'notif' : (mode === 'owner' ? 'o_' + ownerTab : tab))}>
+          {renderBody()}
+        </div>
         <SessionReminders userId={user.id} />
       </div>
 

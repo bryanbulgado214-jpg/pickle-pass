@@ -192,6 +192,14 @@ export const NotificationBell = ({ count, onClick }) => (
   </button>
 );
 
+export const Skeleton = ({ rows = 3 }) => (
+  <div className="skeletonWrap">
+    {Array.from({ length: rows }).map((_, i) => (
+      <div key={i} className="skeletonRow" style={{ width: i === 0 ? '60%' : i === rows - 1 ? '40%' : '85%' }} />
+    ))}
+  </div>
+);
+
 export const CourtBackdrop = () => (
   <svg className="courtBackdrop" viewBox="0 0 300 220" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
     <defs>

@@ -894,5 +894,34 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .onboardingDot { width: 8px; height: 8px; border-radius: 50%; background: var(--line-border2); transition: background 0.2s; }
 .onboardingDot.active { background: var(--ball); }
 
-@media (prefers-reduced-motion: reduce) { .capFill { transition: none; } .loadingBall .ballBounce { animation: none; } }
+/* screen fade transition */
+.screenFade { animation: fadeIn 150ms ease-out both; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* skeleton loader */
+.skeletonWrap { padding: 20px 0; display: flex; flex-direction: column; gap: 12px; }
+.skeletonRow { height: 14px; border-radius: 8px; background: linear-gradient(90deg, var(--ink2) 25%, var(--ink3) 50%, var(--ink2) 75%);
+  background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* landing hero */
+.landingHero { text-align: center; padding: 40px 20px 30px; }
+.landingTagline { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; line-height: 1.2; margin-top: 16px; }
+.landingDesc { color: var(--sand); font-size: 14px; line-height: 1.6; margin-top: 10px; max-width: 320px; margin-left: auto; margin-right: auto; }
+.featureGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px auto; max-width: 340px; }
+.featureCard { background: var(--ink2); border: 1px solid var(--line-border); border-radius: 14px; padding: 16px 12px; text-align: center; }
+.featureEmoji { font-size: 28px; }
+.featureLabel { font-size: 13px; font-weight: 600; margin-top: 6px; color: var(--text); }
+
+/* admin users tab */
+.adminUserRow { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--ink2); border: 1px solid var(--line-border); border-radius: 12px; margin-bottom: 8px; }
+.adminUserInfo { flex: 1; }
+.adminUserName { font-weight: 600; font-size: 14px; }
+.adminUserMeta { font-size: 12px; color: var(--sand); margin-top: 2px; }
+.adminBadge { background: rgba(215,240,0,0.15); color: #D7F000; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+.adminSearch { width: 100%; margin-bottom: 12px; }
+.adminThumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
+.flagBtn { background: rgba(255,107,87,0.12); color: #FF6B57; border: none; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) { .capFill { transition: none; } .loadingBall .ballBounce { animation: none; } .screenFade { animation: none; } .skeletonRow { animation: none; } }
 @media (max-width: 430px) { .phone { height: 84vh; border-radius: 24px; } }
