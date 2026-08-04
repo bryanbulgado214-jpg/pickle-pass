@@ -10,6 +10,12 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenRe
   const [sessionCount, setSessionCount] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editSkill, setEditSkill] = useState('');
+  const [editHometown, setEditHometown] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [saving, setSaving] = useState(false);
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -58,6 +64,30 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenRe
     setUploading(false);
   }
 
+  function startEdit() {
+    setEditName(profile.full_name || '');
+    setEditSkill(profile.skill_level || '');
+    setEditHometown(profile.hometown || '');
+    setEditBio(profile.bio || '');
+    setEditing(true);
+  }
+
+  async function saveEdit() {
+    setSaving(true);
+    try {
+      await updateProfile({
+        full_name: editName.trim() || profile.full_name,
+        skill_level: editSkill || null,
+        hometown: editHometown.trim() || null,
+        bio: editBio.trim() || null,
+      });
+      setEditing(false);
+    } catch (err) {
+      setUploadError('Failed to save profile changes.');
+    }
+    setSaving(false);
+  }
+
   if (!profile) return null;
   const league = LEAGUES[CURRENT_LEAGUE_INDEX];
 
@@ -75,10 +105,45 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenRe
       {uploadError && <div className="errorBanner">{uploadError}</div>}
       <div className="profileNameRow">
         <span className="profileName">{profile.full_name}</span>
+        <button className="editProfileBtn" onClick={editing ? () => setEditing(false) : startEdit}>
+          {editing ? 'Cancel' : 'Edit Profile'}
+        </button>
       </div>
       <div className="sub">
         Member since {new Date(profile.member_since || profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+        {profile.skill_level && <span> · {profile.skill_level}</span>}
+        {profile.hometown && <span> · {profile.hometown}</span>}
       </div>
+      {profile.bio && !editing && <div className="profileBio">{profile.bio}</div>}
+
+      {editing && (
+        <div className="editProfileForm">
+          <label className="editField">
+            <span className="editLabel">Name</span>
+            <input value={editName} onChange={(e) => setEditName(e.target.value)} className="editInput" />
+          </label>
+          <label className="editField">
+            <span className="editLabel">Skill Level</span>
+            <select value={editSkill} onChange={(e) => setEditSkill(e.target.value)} className="editInput">
+              <option value="">Not set</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </label>
+          <label className="editField">
+            <span className="editLabel">Hometown</span>
+            <input value={editHometown} onChange={(e) => setEditHometown(e.target.value)} className="editInput" placeholder="e.g. Siquijor" />
+          </label>
+          <label className="editField">
+            <span className="editLabel">Bio</span>
+            <textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} className="editInput" rows={2} placeholder="Tell others about yourself..." />
+          </label>
+          <button className="cta" onClick={saveEdit} disabled={saving} style={{ marginTop: 8 }}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      )}
 
       <div className="statGrid" style={{ marginTop: 14 }}>
         <div className="stat">

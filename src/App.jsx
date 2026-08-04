@@ -41,6 +41,7 @@ function AppInner() {
   const [myCourts, setMyCourts] = useState([]);
   const [activeOwnerCourtId, setActiveOwnerCourtId] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
   const [pushDismissed, setPushDismissed] = useState(() => localStorage.getItem('pp_push_dismissed') === '1');
   const [theme, setTheme] = useState(() => localStorage.getItem('pp_theme') || 'dark');
   const [onboarded, setOnboarded] = useState(() => localStorage.getItem('pp_onboarded') === '1');
@@ -53,6 +54,7 @@ function AppInner() {
   useEffect(() => {
     if (!user) return;
     loadUnreadCount();
+    loadUnreadMessages();
   }, [user]);
 
   useEffect(() => {
@@ -66,6 +68,15 @@ function AppInner() {
       .eq('profile_id', user.id)
       .eq('is_read', false);
     setUnreadCount(count || 0);
+  }
+
+  async function loadUnreadMessages() {
+    const { count } = await supabase
+      .from('direct_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('receiver_id', user.id)
+      .eq('is_read', false);
+    setUnreadMsgCount(count || 0);
   }
 
   async function loadMyCourts() {
@@ -180,7 +191,7 @@ function AppInner() {
 
     if (tab === 'feed') return <FeedScreen />;
     if (tab === 'play') return <SessionsScreen />;
-    if (tab === 'chat') return <ChatScreen onBack={() => setTab('feed')} onOpenProfile={(id) => openOverlay('playerProfile', id)} />;
+    if (tab === 'chat') return <ChatScreen onBack={() => setTab('feed')} onOpenProfile={(id) => openOverlay('playerProfile', id)} onRead={() => setUnreadMsgCount(0)} />;
     if (tab === 'map') return <MapView onOpenCourt={(ct) => openOverlay('court', ct)} />;
     if (tab === 'games') return <MyGamesScreen />;
     if (tab === 'profile') {
@@ -268,7 +279,10 @@ function AppInner() {
             className={activeNavId === id && !showNotifications && !overlay ? 'navOn' : ''}
             onClick={() => handleNavClick(id)}
           >
-            <span className="navIcon">{icon}</span>
+            <span className="navIcon">
+              {icon}
+              {id === 'chat' && unreadMsgCount > 0 && <span className="navBadge">{unreadMsgCount}</span>}
+            </span>
             <span>{label}</span>
           </button>
         ))}

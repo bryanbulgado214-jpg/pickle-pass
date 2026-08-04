@@ -6,11 +6,23 @@ import { CourtGalleryViewer } from './CourtGallery';
 import ReviewSheet from './ReviewSheet';
 import ShareButton from './ShareButton';
 
+function getFavorites() {
+  try { return JSON.parse(localStorage.getItem('pp_fav_courts') || '[]'); } catch { return []; }
+}
+
 export default function CourtProfile({ court, onBack, onOpenSession }) {
   const [reviews, setReviews] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showReview, setShowReview] = useState(false);
+  const [isFav, setIsFav] = useState(() => getFavorites().includes(court.id));
+
+  function toggleFav() {
+    const favs = getFavorites();
+    const next = favs.includes(court.id) ? favs.filter((id) => id !== court.id) : [...favs, court.id];
+    localStorage.setItem('pp_fav_courts', JSON.stringify(next));
+    setIsFav(next.includes(court.id));
+  }
 
   useEffect(() => {
     loadData();
@@ -55,6 +67,9 @@ export default function CourtProfile({ court, onBack, onOpenSession }) {
           {court.town}
           {court.verified && <span className="verifiedTick"> {"✓"} Verified</span>}
         </div>
+        <button className={`favBtnLarge${isFav ? ' favOn' : ''}`} onClick={toggleFav}>
+          {isFav ? '❤️ Favorited' : '\u{1F90D} Add to Favorites'}
+        </button>
         {avgRating && (
           <div className="courtRatingBig">{"★"} {avgRating} <span className="sub">({reviews.length} review{reviews.length !== 1 ? 's' : ''})</span></div>
         )}

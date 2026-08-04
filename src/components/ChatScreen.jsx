@@ -5,7 +5,7 @@ import { C } from '../lib/constants';
 import { PersonAvatar, Ball, LoadingBall } from './ui';
 import ChatThread from './ChatThread';
 
-export default function ChatScreen({ onBack, onOpenProfile }) {
+export default function ChatScreen({ onBack, onOpenProfile, onRead }) {
   const { user } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,6 +13,7 @@ export default function ChatScreen({ onBack, onOpenProfile }) {
 
   useEffect(() => {
     loadConversations();
+    onRead?.();
   }, []);
 
   async function loadConversations() {

@@ -923,5 +923,28 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .adminThumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
 .flagBtn { background: rgba(255,107,87,0.12); color: #FF6B57; border: none; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
 
+/* Nav badge for unread messages */
+.navIcon { position: relative; }
+.navBadge { position: absolute; top: -6px; right: -10px; background: #FF6B57; color: #fff; font-size: 9px; font-weight: 700;
+  min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+
+/* Profile edit */
+.editProfileBtn { background: rgba(215,240,0,0.12); color: #D7F000; border: none; font-size: 12px; font-weight: 600;
+  padding: 5px 14px; border-radius: 20px; cursor: pointer; margin-left: auto; }
+.profileNameRow { display: flex; align-items: center; gap: 10px; }
+.profileBio { color: var(--sand); font-size: 13px; margin: 6px 0 0; line-height: 1.4; opacity: 0.8; }
+.editProfileForm { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; padding: 14px; background: var(--ink2); border-radius: 14px; }
+.editField { display: flex; flex-direction: column; gap: 4px; }
+.editLabel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--sand); opacity: 0.7; }
+.editInput { background: var(--ink); border: 1px solid var(--line-border); color: var(--text); border-radius: 10px;
+  padding: 10px 12px; font-size: 14px; font-family: 'Outfit', sans-serif; }
+.editInput:focus { outline: none; border-color: #D7F000; }
+
+/* Court favorites */
+.favBtn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px 8px; flex-shrink: 0; }
+.favBtnLarge { background: rgba(255,255,255,0.08); border: 1px solid var(--line-border); color: var(--sand);
+  font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 20px; cursor: pointer; margin-top: 10px; }
+.favBtnLarge.favOn { background: rgba(255,107,87,0.12); border-color: rgba(255,107,87,0.3); }
+
 @media (prefers-reduced-motion: reduce) { .capFill { transition: none; } .loadingBall .ballBounce { animation: none; } .screenFade { animation: none; } .skeletonRow { animation: none; } }
 @media (max-width: 430px) { .phone { height: 84vh; border-radius: 24px; } }

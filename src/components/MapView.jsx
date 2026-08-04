@@ -6,6 +6,10 @@ import { Ball, LoadingBall } from './ui';
 import { CourtsMap } from './TileMap';
 import { haversineKm } from '../lib/utils';
 
+function getFavorites() {
+  try { return JSON.parse(localStorage.getItem('pp_fav_courts') || '[]'); } catch { return []; }
+}
+
 export default function MapView({ onOpenCourt }) {
   const { user } = useAuth();
   const [courts, setCourts] = useState([]);
@@ -13,6 +17,16 @@ export default function MapView({ onOpenCourt }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
+  const [favorites, setFavorites] = useState(getFavorites);
+
+  function toggleFav(courtId, e) {
+    e.stopPropagation();
+    setFavorites((prev) => {
+      const next = prev.includes(courtId) ? prev.filter((id) => id !== courtId) : [...prev, courtId];
+      localStorage.setItem('pp_fav_courts', JSON.stringify(next));
+      return next;
+    });
+  }
 
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(
@@ -82,6 +96,32 @@ export default function MapView({ onOpenCourt }) {
         </div>
       )}
 
+      {favorites.length > 0 && !selectedId && (
+        <>
+          <div className="h2" style={{ marginTop: 12 }}>FAVORITES</div>
+          {courtsWithDist.filter((ct) => favorites.includes(ct.id)).map((ct) => (
+            <button key={ct.id} className="mapRow" onClick={() => onOpenCourt(ct)}>
+              <div className="mapRowL">
+                <Ball size={14} />
+                <div>
+                  <div className="mapName">
+                    {ct.name}
+                    {ct.verified && <span className="verifiedTick" title="Verified court">{"✓"}</span>}
+                  </div>
+                  <div className="mapTown">
+                    {ct.town}
+                    {ct.km != null ? ` · ${ct.km.toFixed(1)} km` : ''}
+                    {ct.rating ? ` · ★ ${ct.rating}` : ''}
+                  </div>
+                </div>
+              </div>
+              <button className="favBtn favOn" onClick={(e) => toggleFav(ct.id, e)} title="Remove from favorites">{"❤️"}</button>
+            </button>
+          ))}
+          <div className="h2" style={{ marginTop: 12 }}>ALL COURTS</div>
+        </>
+      )}
+
       {courtsWithDist.filter((ct) => !selectedId || ct.id === selectedId).map((ct) => (
         <button key={ct.id} className="mapRow" onClick={() => onOpenCourt(ct)}>
           <div className="mapRowL">
@@ -98,7 +138,9 @@ export default function MapView({ onOpenCourt }) {
               </div>
             </div>
           </div>
-          <span className="profileLinkVal">{"→"}</span>
+          <button className="favBtn" onClick={(e) => toggleFav(ct.id, e)} title={favorites.includes(ct.id) ? 'Remove from favorites' : 'Add to favorites'}>
+            {favorites.includes(ct.id) ? '❤️' : '\u{1F90D}'}
+          </button>
         </button>
       ))}
     </div>
