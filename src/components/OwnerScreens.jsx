@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
@@ -77,6 +77,45 @@ export function OwnerVerifyScreen({ court, myCourts, onSwitchCourt, onSubmitted,
 }
 
 export function OwnerHome({ court, myCourts, activeOwnerCourtId, onSwitchCourt }) {
+  const [sessions, setSessions] = useState([]);
+  const [participants, setParticipants] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!court?.id) return;
+    loadSessions();
+  }, [court?.id]);
+
+  async function loadSessions() {
+    setLoading(true);
+    const { data: sessData } = await supabase
+      .from('sessions')
+      .select('*')
+      .eq('court_id', court.id)
+      .order('created_at', { ascending: false });
+
+    const list = sessData || [];
+    setSessions(list);
+
+    if (list.length) {
+      const ids = list.map(s => s.id);
+      const { data: partData } = await supabase
+        .from('session_participants')
+        .select('session_id, status')
+        .in('session_id', ids)
+        .eq('status', 'confirmed');
+      const map = {};
+      (partData || []).forEach(p => {
+        map[p.session_id] = (map[p.session_id] || 0) + 1;
+      });
+      setParticipants(map);
+    }
+    setLoading(false);
+  }
+
+  const typeLabels = { OPEN_PLAY: 'Open Play', TRAINING: 'Training', RENTAL: 'Rental' };
+  const typeTones = { OPEN_PLAY: 'open', TRAINING: 'training', RENTAL: 'rental' };
+
   return (
     <div className="pane">
       <CourtSwitcher myCourts={myCourts} activeId={activeOwnerCourtId} onSwitch={onSwitchCourt} />
@@ -84,11 +123,40 @@ export function OwnerHome({ court, myCourts, activeOwnerCourtId, onSwitchCourt }
         <div className="h1">TODAY AT {(court?.name || '').toUpperCase()}</div>
         <div className="sub">Owner console {"·"} {court?.town} {"·"} <span className="verifiedTick">{"✓"} Verified</span></div>
       </div>
-      <div className="empty">
-        <Ball size={30} />
-        <div className="cardTitle" style={{ marginTop: 10 }}>No listings yet</div>
-        <div className="sub">Head to "New Listing" to post your first session.</div>
-      </div>
+
+      {loading && <div className="empty"><p style={{ color: C.sand }}>Loading sessions...</p></div>}
+
+      {!loading && sessions.length === 0 && (
+        <div className="empty">
+          <Ball size={30} />
+          <div className="cardTitle" style={{ marginTop: 10 }}>No listings yet</div>
+          <div className="sub">Head to "New Listing" to post your first session.</div>
+        </div>
+      )}
+
+      {!loading && sessions.map(s => {
+        const joined = participants[s.id] || 0;
+        return (
+          <div key={s.id} className="ownerCard" style={{ marginBottom: 12 }}>
+            <div className="rowTags">
+              <Tag tone={typeTones[s.type] || 'rental'}>{typeLabels[s.type] || s.type}</Tag>
+              {s.live && <Tag tone="live">LIVE</Tag>}
+            </div>
+            <div className="cardTitle">{s.label}</div>
+            <div className="cardSub">{s.schedule_text}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+              <div className="cardMeta">
+                {"₱"}{s.fee} {"·"} {joined}{s.cap ? `/${s.cap}` : ''} joined
+              </div>
+              {s.cap && (
+                <div className="capTrack" style={{ width: 80, height: 6 }}>
+                  <div className="capFill" style={{ width: `${Math.min(100, (joined / s.cap) * 100)}%`, background: joined >= s.cap ? C.coral : C.ball }} />
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

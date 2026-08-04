@@ -3,14 +3,18 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
 import { Tag } from './ui';
+import TourneyRegisterSheet from './TourneyRegisterSheet';
 
 export default function TournamentDetail({ tournament, court, onBack }) {
   const { user } = useAuth();
   const [registered, setRegistered] = useState(false);
+  const [regCount, setRegCount] = useState(tournament._regCount || 0);
   const [loading, setLoading] = useState(true);
+  const [showSheet, setShowSheet] = useState(false);
 
   useEffect(() => {
     checkRegistration();
+    loadRegCount();
   }, [tournament.id]);
 
   async function checkRegistration() {
@@ -25,16 +29,29 @@ export default function TournamentDetail({ tournament, court, onBack }) {
     setLoading(false);
   }
 
-  async function handleRegister() {
+  async function loadRegCount() {
+    const { count } = await supabase
+      .from('tournament_registrations')
+      .select('id', { count: 'exact', head: true })
+      .eq('tournament_id', tournament.id);
+    setRegCount(count || 0);
+  }
+
+  async function handleConfirmRegister() {
     await supabase.from('tournament_registrations').insert({
       tournament_id: tournament.id,
       profile_id: user.id,
     });
+    setShowSheet(false);
     checkRegistration();
+    loadRegCount();
   }
 
-  const full = tournament.registered >= tournament.max_teams;
-  const pct = Math.min(100, (tournament.registered / tournament.max_teams) * 100);
+  const full = regCount >= tournament.max_teams;
+  const pct = Math.min(100, (regCount / tournament.max_teams) * 100);
+  const dateStr = tournament.event_date
+    ? new Date(tournament.event_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    : '';
 
   return (
     <div className="pane">
@@ -53,9 +70,9 @@ export default function TournamentDetail({ tournament, court, onBack }) {
       )}
 
       <div className="statGrid">
-        <div className="stat"><div className="statK">DATES</div><div className="statV">{tournament.date_text}</div></div>
+        <div className="stat"><div className="statK">DATE</div><div className="statV">{dateStr}</div></div>
         <div className="stat"><div className="statK">ENTRY FEE</div><div className="statV">{"₱"}{tournament.fee} {tournament.fee_unit || 'per team'}</div></div>
-        <div className="stat"><div className="statK">DEADLINE</div><div className="statV">{tournament.reg_deadline || '—'}</div></div>
+        <div className="stat"><div className="statK">MAX TEAMS</div><div className="statV">{tournament.max_teams}</div></div>
         <div className="stat"><div className="statK">PRIZE</div><div className="statV">{tournament.prize || 'TBA'}</div></div>
       </div>
 
@@ -69,21 +86,29 @@ export default function TournamentDetail({ tournament, court, onBack }) {
       <div className="block">
         <div className="h2">REGISTRATION</div>
         <div className="capScore" style={{ color: full ? C.coral : '#D4AF37' }}>
-          {tournament.registered}<span className="capSlash">/</span>{tournament.max_teams}
+          {regCount}<span className="capSlash">/</span>{tournament.max_teams}
         </div>
         <div className="capTrack">
           <div className="capFill" style={{ width: pct + '%', background: full ? C.coral : '#D4AF37' }} />
         </div>
-        <div className="capNote">{full ? 'Full — join waitlist' : `${tournament.max_teams - tournament.registered} spots left`}</div>
+        <div className="capNote">{full ? 'Full — join waitlist' : `${tournament.max_teams - regCount} spots left`}</div>
       </div>
 
       {!loading && (registered ? (
         <div className="joinedBanner">{"✓"} You{"'"}re registered! Bracket and match times post closer to the date.</div>
       ) : (
-        <button className="cta" disabled={full} onClick={handleRegister}>
+        <button className="cta" disabled={full} onClick={() => setShowSheet(true)}>
           {full ? 'Full — join waitlist' : `Register · ₱${tournament.fee} ${tournament.fee_unit || 'per team'}`}
         </button>
       ))}
+
+      {showSheet && (
+        <TourneyRegisterSheet
+          tournament={tournament}
+          onClose={() => setShowSheet(false)}
+          onConfirm={handleConfirmRegister}
+        />
+      )}
     </div>
   );
 }
