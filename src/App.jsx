@@ -28,6 +28,7 @@ import { OwnerPayoutLedger } from './components/PaymentHistory';
 import ClubScreen from './components/ClubScreen';
 import CourtProfile from './components/CourtProfile';
 import CourtDetail from './components/CourtDetail';
+import OnboardingWizard from './components/OnboardingWizard';
 
 function AppInner() {
   const { user, profile, loading, signOut } = useAuth();
@@ -42,6 +43,7 @@ function AppInner() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [pushDismissed, setPushDismissed] = useState(() => localStorage.getItem('pp_push_dismissed') === '1');
   const [theme, setTheme] = useState(() => localStorage.getItem('pp_theme') || 'dark');
+  const [onboarded, setOnboarded] = useState(() => localStorage.getItem('pp_onboarded') === '1');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -94,6 +96,10 @@ function AppInner() {
   }
 
   if (!user) return <AuthScreen />;
+
+  if (!onboarded) {
+    return <OnboardingWizard onComplete={() => setOnboarded(true)} />;
+  }
 
   const activeCourt = myCourts.find((c) => c.id === activeOwnerCourtId) || myCourts[0];
 

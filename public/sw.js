@@ -1,17 +1,21 @@
-const CACHE_NAME = 'pickle-pass-v2';
+const CACHE_NAME = 'pickle-pass-v3';
+const STATIC_CACHE = 'pickle-pass-static-v3';
+const API_CACHE = 'pickle-pass-api-v1';
+
 const PRECACHE = ['/', '/index.html'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE))
+    caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE))
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
+  const keep = [STATIC_CACHE, API_CACHE];
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => !keep.includes(k)).map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();
@@ -19,11 +23,44 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+
+  const url = new URL(e.request.url);
+
+  // Supabase API: stale-while-revalidate
+  if (url.hostname.includes('supabase.co') && url.pathname.startsWith('/rest/')) {
+    e.respondWith(
+      caches.open(API_CACHE).then(async (cache) => {
+        const cached = await cache.match(e.request);
+        const fetchPromise = fetch(e.request).then((res) => {
+          if (res.ok) cache.put(e.request, res.clone());
+          return res;
+        }).catch(() => cached);
+        return cached || fetchPromise;
+      })
+    );
+    return;
+  }
+
+  // Static assets (JS, CSS, images, fonts): cache-first
+  if (url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|webp|woff2?|ico)$/)) {
+    e.respondWith(
+      caches.open(STATIC_CACHE).then(async (cache) => {
+        const cached = await cache.match(e.request);
+        if (cached) return cached;
+        const res = await fetch(e.request);
+        if (res.ok) cache.put(e.request, res.clone());
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Navigation & other: network-first with cache fallback
   e.respondWith(
     fetch(e.request)
       .then((res) => {
         const clone = res.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+        caches.open(STATIC_CACHE).then((cache) => cache.put(e.request, clone));
         return res;
       })
       .catch(() => caches.match(e.request))
