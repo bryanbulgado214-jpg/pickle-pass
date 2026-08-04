@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
 import { Tag, Capacity, PersonAvatar } from './ui';
 import PaySheet from './PaySheet';
+import ReviewSheet from './ReviewSheet';
 
 export default function CourtDetail({ session, court, onBack }) {
   const { user } = useAuth();
@@ -11,9 +12,12 @@ export default function CourtDetail({ session, court, onBack }) {
   const [myStatus, setMyStatus] = useState(null);
   const [paying, setPaying] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState([]);
+  const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
     loadParticipants();
+    loadReviews();
   }, [session.id]);
 
   async function loadParticipants() {
@@ -29,6 +33,20 @@ export default function CourtDetail({ session, court, onBack }) {
     setMyStatus(mine?.status || null);
     setLoading(false);
   }
+
+  async function loadReviews() {
+    const { data } = await supabase
+      .from('court_reviews')
+      .select('*, profiles:profile_id(full_name, photo_url)')
+      .eq('court_id', court.id)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    setReviews(data || []);
+  }
+
+  const avgRating = reviews.length
+    ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
+    : null;
 
   const confirmed = participants.filter((p) => p.status === 'confirmed');
   const waitlisted = participants.filter((p) => p.status === 'waitlisted');
@@ -159,6 +177,28 @@ export default function CourtDetail({ session, court, onBack }) {
         5% service fee ({"₱"}{serviceFee.toFixed(2)}) applies. Full refund if you cancel before the session starts.
       </div>
 
+      <div className="reviewSection">
+        <div className="reviewHeader">
+          <div className="h2">REVIEWS {avgRating && <span className="avgBadge">{"★"} {avgRating}</span>}</div>
+          <button className="linkBtn small" onClick={() => setShowReview(true)}>Write a review</button>
+        </div>
+        {reviews.length === 0 && (
+          <div className="sub" style={{ fontSize: 12.5 }}>No reviews yet. Be the first!</div>
+        )}
+        {reviews.map((r) => (
+          <div key={r.id} className="reviewCard">
+            <div className="reviewTop">
+              <span className="reviewAuthor">{r.profiles?.full_name || 'Player'}</span>
+              <span className="reviewStars">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+            </div>
+            {r.review_text && <p className="reviewText">{r.review_text}</p>}
+            <div className="reviewTime">
+              {new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {paying && (
         <PaySheet
           fee={fee}
@@ -166,6 +206,14 @@ export default function CourtDetail({ session, court, onBack }) {
           label={session.label}
           onClose={() => setPaying(false)}
           onConfirm={handlePayConfirm}
+        />
+      )}
+
+      {showReview && (
+        <ReviewSheet
+          court={court}
+          onClose={() => setShowReview(false)}
+          onSubmitted={loadReviews}
         />
       )}
     </div>

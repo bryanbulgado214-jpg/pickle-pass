@@ -13,6 +13,7 @@ export default function FeedScreen({ onOpenProfile }) {
   const [error, setError] = useState(null);
   const [commentsPostId, setCommentsPostId] = useState(null);
   const [feedFilter, setFeedFilter] = useState('foryou');
+  const [newCount, setNewCount] = useState(0);
 
   const loadPosts = useCallback(async () => {
     setLoading(true);
@@ -58,6 +59,24 @@ export default function FeedScreen({ onOpenProfile }) {
     loadPosts();
   }, [loadPosts]);
 
+  useEffect(() => {
+    const channel = supabase
+      .channel('feed-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, () => {
+        setNewCount((c) => c + 1);
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'posts' }, () => {
+        loadPosts();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [loadPosts]);
+
+  const handleShowNew = () => {
+    setNewCount(0);
+    loadPosts();
+  };
+
   return (
     <div className="pane">
       <div className="feedTopRow">
@@ -80,6 +99,12 @@ export default function FeedScreen({ onOpenProfile }) {
       </div>
 
       {error && <div className="errorBanner">{error}</div>}
+
+      {newCount > 0 && (
+        <button className="newPostsBanner" onClick={handleShowNew}>
+          {newCount} new {newCount === 1 ? 'post' : 'posts'} — tap to refresh
+        </button>
+      )}
 
       <PostComposer onPostCreated={loadPosts} />
 

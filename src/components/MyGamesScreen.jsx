@@ -1,8 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
 import { Ball, Tag } from './ui';
+import QRCode from 'qrcode';
+
+function QRCanvas({ value, size = 70 }) {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    if (!canvasRef.current || !value) return;
+    QRCode.toCanvas(canvasRef.current, value, {
+      width: size,
+      margin: 1,
+      color: { dark: '#0A2E3C', light: '#F2F6F1' },
+    }).catch(() => {});
+  }, [value, size]);
+  return <canvas ref={canvasRef} className="qrCanvas" />;
+}
 
 export default function MyGamesScreen() {
   const { user } = useAuth();
@@ -41,7 +55,7 @@ export default function MyGamesScreen() {
 
     const { data: regs } = await supabase
       .from('tournament_registrations')
-      .select('*, tournament:tournament_id(id, name, date_text, court:court_id(id, name))')
+      .select('*, tournament:tournament_id(id, name, event_date, court:court_id(id, name))')
       .eq('profile_id', user.id);
     setTournaments((regs || []).filter((r) => r.tournament).map((r) => ({
       regId: r.id,
@@ -100,28 +114,29 @@ export default function MyGamesScreen() {
               <div className="cardTitle">{g.session.label || 'Session'}</div>
               <div className="cardMeta">{g.court?.name} {g.session.schedule_text ? `· ${g.session.schedule_text}` : ''}</div>
             </div>
-            <div className="qr" aria-label="QR gate pass">
-              {Array.from({ length: 25 }).map((_, i) => (
-                <span key={i} style={{ opacity: (i * 7) % 3 ? 1 : 0.15 }} />
-              ))}
-            </div>
+            <QRCanvas value={`pp:checkin:${g.session.id}:${g.participantId}`} />
           </div>
           <button className="cancelLink" onClick={() => cancelSpot(g.participantId)}>Cancel my spot</button>
         </div>
       ))}
 
-      {tournaments.map((t) => (
-        <div key={t.regId} className="ticket">
-          <div className="ticketTop">
-            <div>
-              <div className="rowTags"><Tag tone="tourney">{"\u{1F3C6}"} TOURNAMENT</Tag></div>
-              <div className="cardTitle">{t.name}</div>
-              <div className="cardMeta">{t.courtName} {t.date_text ? `· ${t.date_text}` : ''}</div>
+      {tournaments.map((t) => {
+        const dateStr = t.event_date
+          ? new Date(t.event_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          : '';
+        return (
+          <div key={t.regId} className="ticket">
+            <div className="ticketTop">
+              <div>
+                <div className="rowTags"><Tag tone="tourney">{"\u{1F3C6}"} TOURNAMENT</Tag></div>
+                <div className="cardTitle">{t.name}</div>
+                <div className="cardMeta">{t.courtName} {dateStr ? `· ${dateStr}` : ''}</div>
+              </div>
+              <div className="tourneyTicketBadge">{"\u{1F3C6}"}</div>
             </div>
-            <div className="tourneyTicketBadge">{"\u{1F3C6}"}</div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {waitlisted.length > 0 && (
         <>
