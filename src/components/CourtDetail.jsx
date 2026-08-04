@@ -232,6 +232,7 @@ export default function CourtDetail({ session, court, onBack }) {
           fee={fee}
           serviceFee={serviceFee}
           label={session.label}
+          sessionId={session.id}
           onClose={() => setPaying(false)}
           onConfirm={handlePayConfirm}
         />

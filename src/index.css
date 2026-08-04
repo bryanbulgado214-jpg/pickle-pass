@@ -946,5 +946,14 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
   font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 20px; cursor: pointer; margin-top: 10px; }
 .favBtnLarge.favOn { background: rgba(255,107,87,0.12); border-color: rgba(255,107,87,0.3); }
 
+/* Payment toast */
+.paymentToast { padding: 14px 18px; border-radius: 12px; font-weight: 600; font-size: 14px; text-align: center;
+  animation: fadeIn 0.3s ease; }
+.paymentToast.success { background: rgba(57,217,138,0.15); color: #39D98A; }
+.paymentToast.failed { background: rgba(255,107,87,0.15); color: #FF6B57; }
+.payStatus { font-weight: 700; text-transform: uppercase; font-size: 10px; }
+.payStatus.pending { color: #D7F000; }
+.payStatus.failed, .payStatus.expired { color: #FF6B57; }
+
 @media (prefers-reduced-motion: reduce) { .capFill { transition: none; } .loadingBall .ballBounce { animation: none; } .screenFade { animation: none; } .skeletonRow { animation: none; } }
 @media (max-width: 430px) { .phone { height: 84vh; border-radius: 24px; } }

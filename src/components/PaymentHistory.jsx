@@ -34,10 +34,38 @@ export default function PaymentHistory({ onBack }) {
       .eq('profile_id', user.id)
       .order('created_at', { ascending: false });
 
-    const items = [];
+    // Also fetch from payments table (real Xendit payments)
+    const { data: xenditPayments } = await supabase
+      .from('payments')
+      .select('*, session:session_id(label, court:court_id(name)), tournament:tournament_id(name, court:court_id(name))')
+      .eq('profile_id', user.id)
+      .order('created_at', { ascending: false });
 
+    const items = [];
+    const xenditSessionIds = new Set();
+    const xenditTourneyIds = new Set();
+
+    // Real Xendit payments take priority
+    (xenditPayments || []).forEach((p) => {
+      if (p.session_id) xenditSessionIds.add(p.session_id);
+      if (p.tournament_id) xenditTourneyIds.add(p.tournament_id);
+      items.push({
+        id: `pay-${p.id}`,
+        type: p.tournament_id ? 'Tournament' : p.booking_id ? 'Booking' : 'Session',
+        label: p.session?.label || p.tournament?.name || 'Payment',
+        court: p.session?.court?.name || p.tournament?.court?.name || null,
+        fee: Number(p.amount),
+        serviceFee: Number(p.service_fee),
+        total: Number(p.total),
+        date: p.paid_at || p.created_at,
+        method: (p.payment_method || 'gcash').toUpperCase(),
+        status: p.status,
+      });
+    });
+
+    // Legacy session-based records (skip if already covered by payments table)
     (participants || []).forEach((p) => {
-      if (!p.session) return;
+      if (!p.session || xenditSessionIds.has(p.session_id)) return;
       const fee = Number(p.session.fee);
       const serviceFee = Math.round(fee * 0.05 * 100) / 100;
       items.push({
@@ -50,6 +78,7 @@ export default function PaymentHistory({ onBack }) {
         total: fee + serviceFee,
         date: p.joined_at || p.created_at,
         method: 'GCash / Maya',
+        status: 'paid',
       });
     });
 
@@ -64,11 +93,12 @@ export default function PaymentHistory({ onBack }) {
         total: 0,
         date: b.created_at,
         method: 'GCash / Maya',
+        status: 'paid',
       });
     });
 
     (tourneyRegs || []).forEach((r) => {
-      if (!r.tournament) return;
+      if (!r.tournament || xenditTourneyIds.has(r.tournament_id)) return;
       const fee = Number(r.tournament.fee || 0);
       const serviceFee = Math.round(fee * 0.05 * 100) / 100;
       items.push({
@@ -81,6 +111,7 @@ export default function PaymentHistory({ onBack }) {
         total: fee + serviceFee,
         date: r.created_at,
         method: 'GCash / Maya',
+        status: 'paid',
       });
     });
 
@@ -131,7 +162,12 @@ export default function PaymentHistory({ onBack }) {
           </div>
           <div className="receiptBottom">
             <span>{new Date(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-            <span>{p.method}</span>
+            <span>
+              {p.method}
+              {p.status && p.status !== 'paid' && (
+                <span className={`payStatus ${p.status}`}> · {p.status}</span>
+              )}
+            </span>
           </div>
         </div>
       ))}

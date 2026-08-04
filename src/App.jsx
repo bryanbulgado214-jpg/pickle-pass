@@ -45,6 +45,18 @@ function AppInner() {
   const [pushDismissed, setPushDismissed] = useState(() => localStorage.getItem('pp_push_dismissed') === '1');
   const [theme, setTheme] = useState(() => localStorage.getItem('pp_theme') || 'dark');
   const [onboarded, setOnboarded] = useState(() => localStorage.getItem('pp_onboarded') === '1');
+  const [paymentStatus, setPaymentStatus] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ps = params.get('payment');
+    if (ps === 'success' || ps === 'failed') {
+      setPaymentStatus(ps);
+      window.history.replaceState({}, '', window.location.pathname);
+      if (ps === 'success') setTab('games');
+      setTimeout(() => setPaymentStatus(null), 5000);
+    }
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -245,6 +257,12 @@ function AppInner() {
       </div>
 
       <div className="body">
+        {paymentStatus === 'success' && (
+          <div className="paymentToast success">{"✅"} Payment successful! You{"'"}re confirmed.</div>
+        )}
+        {paymentStatus === 'failed' && (
+          <div className="paymentToast failed">{"❌"} Payment was not completed. Please try again.</div>
+        )}
         {!pushDismissed && 'Notification' in window && Notification.permission === 'default' && (
           <div className="pushBanner">
             <div className="pushBannerText">
