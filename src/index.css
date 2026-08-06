@@ -490,8 +490,9 @@ button.modeSwitch:hover { background: #D7F000; color: #0A2E3C; }
 .tilePin.you { background: #D7F000; box-shadow: 0 0 8px rgba(215,240,0,0.5); }
 .tilePin.big { width: 20px; height: 20px; }
 .tileAttribution { position: absolute; bottom: 2px; right: 6px; font-size: 9px; color: rgba(255,255,255,0.5); z-index: 3; }
-.mapRow { display: flex; align-items: center; justify-content: space-between; padding: 12px 0;
-  border-bottom: 1px solid rgba(242,246,241,0.08); }
+.mapRow { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: #0F3D4E; border: 1px solid rgba(242,246,241,0.12); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 8px; width: 100%; box-sizing: border-box; text-align: left; }
 .mapRowL { display: flex; align-items: center; gap: 10px; }
 .mapName { font-weight: 600; font-size: 14px; }
 .mapTown { font-size: 12px; color: #B8C9CF; margin-top: 2px; }
