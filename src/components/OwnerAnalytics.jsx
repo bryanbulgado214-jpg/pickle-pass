@@ -12,7 +12,7 @@ function MiniBar({ items, maxVal, barColor }) {
           <div className="miniBarTrack">
             <div
               className="miniBarFill"
-              style={{ height: `${(item.value / max) * 100}%`, background: barColor || C.ball }}
+              style={{ height: `${(item.value / max) * 100}%`, background: barColor || undefined }}
             />
           </div>
           <div className="miniBarLabel">{item.label}</div>
@@ -141,7 +141,7 @@ export default function OwnerAnalytics({ court }) {
       <div className="analyticsBlock">
         <div className="h2">REVENUE BY SESSION</div>
         {sessionRevenues.length > 0 ? (
-          <MiniBar items={sessionRevenues} barColor={C.ball} />
+          <MiniBar items={sessionRevenues} />
         ) : (
           <div className="sub">No session data yet</div>
         )}

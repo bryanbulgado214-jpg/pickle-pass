@@ -230,7 +230,7 @@ function AppInner() {
       <div className="topBar">
         <div className="brand">
           <img src={LOGO_ICON} alt="" className="brandIcon" />
-          <span className="brandName">Pickle<span style={{ color: C.ball }}> Pass</span></span>
+          <span className="brandName">Pickle<span> Pass</span></span>
         </div>
         <div className="topRight">
           {mode === 'player' && (

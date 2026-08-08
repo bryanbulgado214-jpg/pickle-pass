@@ -114,12 +114,12 @@ export const Capacity = ({ joined, walkIns, cap, big, roster, onOpenProfile }) =
   const full = total >= cap;
   const hasRoster = roster && roster.length > 0;
   return (
-    <div className={big ? "cap capBig" : "cap"}>
-      <div className="capScore" style={{ color: full ? C.coral : C.ball }}>
+    <div className={`${big ? "cap capBig" : "cap"}${full ? " capFull" : ""}`}>
+      <div className="capScore">
         {total}<span className="capSlash">/</span>{cap}
       </div>
       <div className="capTrack" role="img" aria-label={`${total} of ${cap} spots taken`}>
-        <div className="capFill" style={{ width: pct + "%", background: full ? C.coral : C.ball }} />
+        <div className="capFill" style={{ width: pct + "%" }} />
         <div className="capKitchen" />
       </div>
       <div className="capNote">

@@ -52,7 +52,7 @@ export default function NotificationsScreen({ onBack }) {
 
       {!loading && notifs.length === 0 && (
         <div className="empty">
-          <p style={{ color: C.sand, fontSize: 14 }}>No notifications yet.</p>
+          <p className="sub" style={{ fontSize: 14 }}>No notifications yet.</p>
         </div>
       )}
 

@@ -45,7 +45,7 @@ export default function CommentsSheet({ postId, onClose }) {
         <div className="commentsList">
           {loading && <LoadingBall />}
           {!loading && comments.length === 0 && (
-            <p style={{ color: C.sand, fontSize: 13 }}>No comments yet. Be the first!</p>
+            <p className="sub" style={{ fontSize: 13 }}>No comments yet. Be the first!</p>
           )}
           {comments.map((c) => (
             <div key={c.id} className="commentRow">

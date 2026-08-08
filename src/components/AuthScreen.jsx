@@ -45,8 +45,8 @@ export default function AuthScreen() {
         </div>
         <div className="authBody" style={{ textAlign: 'center' }}>
           <h2 className="h1" style={{ marginBottom: 12 }}>Check your email</h2>
-          <p style={{ color: C.sand, fontSize: 14, lineHeight: 1.5 }}>
-            We sent a confirmation link to <b style={{ color: C.ball }}>{email}</b>.
+          <p className="sub" style={{ fontSize: 14, lineHeight: 1.5 }}>
+            We sent a confirmation link to <b style={{ color: 'var(--ball)' }}>{email}</b>.
             Click it to activate your account, then come back here to log in.
           </p>
           <button

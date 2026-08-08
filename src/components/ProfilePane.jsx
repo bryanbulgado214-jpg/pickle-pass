@@ -204,7 +204,7 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenRe
 
       <button
         className="cta"
-        style={{ background: 'transparent', border: `1px solid rgba(242,246,241,0.25)`, color: C.line, marginTop: 20 }}
+        style={{ background: 'transparent', border: '1px solid var(--ghost-border)', color: 'var(--sand)', marginTop: 20 }}
         onClick={signOut}
       >
         Log Out

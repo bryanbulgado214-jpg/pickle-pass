@@ -180,7 +180,7 @@ export default function SessionsScreen() {
 
       {!loading && filtered.length === 0 && (
         <div className="empty">
-          <p style={{ color: C.sand, fontSize: 14 }}>
+          <p className="sub" style={{ fontSize: 14 }}>
             No sessions found. Check back later or adjust your filters.
           </p>
         </div>
