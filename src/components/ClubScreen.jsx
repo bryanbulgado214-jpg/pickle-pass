@@ -111,10 +111,16 @@ function ClubDetail({ club, onBack }) {
   const [myMembership, setMyMembership] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState('posts');
+  const [posts, setPosts] = useState([]);
+  const [newPost, setNewPost] = useState('');
+  const [posting, setPosting] = useState(false);
+  const [commentTexts, setCommentTexts] = useState({});
   const photoRef = useRef(null);
 
   useEffect(() => {
     loadMembers();
+    loadPosts();
   }, [club.id]);
 
   async function loadMembers() {
@@ -182,6 +188,41 @@ function ClubDetail({ club, onBack }) {
     setUploading(false);
   }
 
+  async function loadPosts() {
+    const { data } = await supabase
+      .from('club_posts')
+      .select('*, profiles:author_id(id, full_name, photo_url), club_post_comments(*, profiles:author_id(id, full_name, photo_url))')
+      .eq('club_id', club.id)
+      .order('created_at', { ascending: false });
+    setPosts(data || []);
+  }
+
+  async function handlePost(e) {
+    e.preventDefault();
+    if (!newPost.trim()) return;
+    setPosting(true);
+    await supabase.from('club_posts').insert({
+      club_id: club.id,
+      author_id: user.id,
+      content: newPost.trim(),
+    });
+    setNewPost('');
+    setPosting(false);
+    loadPosts();
+  }
+
+  async function handleComment(postId) {
+    const text = commentTexts[postId]?.trim();
+    if (!text) return;
+    await supabase.from('club_post_comments').insert({
+      post_id: postId,
+      author_id: user.id,
+      content: text,
+    });
+    setCommentTexts((prev) => ({ ...prev, [postId]: '' }));
+    loadPosts();
+  }
+
   const isOwner = club.owner_id === user.id;
   const activeMembers = members.filter((m) => m.status !== 'pending');
   const isFull = club.max_members && activeMembers.length >= club.max_members;
@@ -245,16 +286,89 @@ function ClubDetail({ club, onBack }) {
         </>
       )}
 
-      <div className="h2">MEMBERS</div>
-      {members.filter((m) => m.status !== 'pending').map((m) => (
-        <div key={m.id} className="playerRow">
-          <PersonAvatar name={m.profiles?.full_name} photo={m.profiles?.photo_url} size={38} />
-          <div className="playerInfo">
-            <div className="feedName">{m.profiles?.full_name || 'Player'}</div>
-            <div className="cardMeta">{m.role === 'owner' ? 'Owner' : 'Member'}</div>
-          </div>
-        </div>
-      ))}
+      <div className="segment" style={{ marginTop: 16 }}>
+        <button className={activeTab === 'posts' ? 'segOn' : ''} onClick={() => setActiveTab('posts')}>Discussion</button>
+        <button className={activeTab === 'members' ? 'segOn' : ''} onClick={() => setActiveTab('members')}>Members</button>
+      </div>
+
+      {activeTab === 'members' && (
+        <>
+          <div className="h2">MEMBERS</div>
+          {members.filter((m) => m.status !== 'pending').map((m) => (
+            <div key={m.id} className="playerRow">
+              <PersonAvatar name={m.profiles?.full_name} photo={m.profiles?.photo_url} size={38} />
+              <div className="playerInfo">
+                <div className="feedName">{m.profiles?.full_name || 'Player'}</div>
+                <div className="cardMeta">{m.role === 'owner' ? 'Owner' : 'Member'}</div>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {activeTab === 'posts' && (
+        <>
+          {isMember && (
+            <form className="clubPostForm" onSubmit={handlePost}>
+              <textarea
+                className="composerInput"
+                rows={2}
+                value={newPost}
+                onChange={(e) => setNewPost(e.target.value)}
+                placeholder="Post an announcement..."
+              />
+              <button className="cta" type="submit" disabled={posting || !newPost.trim()} style={{ marginTop: 8 }}>
+                {posting ? 'Posting...' : 'Post'}
+              </button>
+            </form>
+          )}
+
+          {posts.length === 0 && (
+            <div className="empty" style={{ marginTop: 16 }}>
+              <div className="cardTitle">No posts yet</div>
+              <div className="sub" style={{ marginTop: 6 }}>
+                {isMember ? 'Be the first to post something!' : 'Join to participate in discussions.'}
+              </div>
+            </div>
+          )}
+
+          {posts.map((post) => (
+            <div key={post.id} className="clubPost">
+              <div className="clubPostHeader">
+                <PersonAvatar name={post.profiles?.full_name} photo={post.profiles?.photo_url} size={32} />
+                <div className="playerInfo">
+                  <div className="feedName">{post.profiles?.full_name || 'Member'}</div>
+                  <div className="cardMeta">{new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</div>
+                </div>
+              </div>
+              <div className="clubPostBody">{post.content}</div>
+
+              {(post.club_post_comments || []).map((c) => (
+                <div key={c.id} className="clubComment">
+                  <PersonAvatar name={c.profiles?.full_name} photo={c.profiles?.photo_url} size={24} />
+                  <div>
+                    <span className="feedName" style={{ fontSize: 12 }}>{c.profiles?.full_name}</span>
+                    <span className="clubCommentText">{c.content}</span>
+                  </div>
+                </div>
+              ))}
+
+              {isMember && (
+                <div className="clubCommentForm">
+                  <input
+                    className="input"
+                    value={commentTexts[post.id] || ''}
+                    onChange={(e) => setCommentTexts((prev) => ({ ...prev, [post.id]: e.target.value }))}
+                    placeholder="Write a comment..."
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleComment(post.id); } }}
+                  />
+                  <button className="ghostBtn" onClick={() => handleComment(post.id)} style={{ padding: '6px 12px', fontSize: 13 }}>Reply</button>
+                </div>
+              )}
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }

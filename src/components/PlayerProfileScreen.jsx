@@ -10,6 +10,7 @@ export default function PlayerProfileScreen({ profileId, onBack }) {
   const [requestId, setRequestId] = useState(null);
   const [sessionCount, setSessionCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [feedback, setFeedback] = useState(null);
 
   useEffect(() => {
     loadProfile();
@@ -69,12 +70,19 @@ export default function PlayerProfileScreen({ profileId, onBack }) {
   }
 
   async function sendRequest() {
-    await supabase.from('connection_requests').insert({
+    setConnectionStatus('sent');
+    const { error } = await supabase.from('connection_requests').insert({
       sender_id: user.id,
       receiver_id: profileId,
       status: 'pending',
     });
-    loadProfile();
+    if (error) {
+      setConnectionStatus(null);
+      setFeedback('Could not send request. Try again.');
+    } else {
+      setFeedback('Request sent!');
+    }
+    setTimeout(() => setFeedback(null), 3000);
   }
 
   async function cancelRequest() {
@@ -135,6 +143,8 @@ export default function PlayerProfileScreen({ profileId, onBack }) {
           <div className="statV">{person.weekly_xp || 0} XP</div>
         </div>
       </div>
+
+      {feedback && <div className="joinedBanner">{feedback}</div>}
 
       {connectionStatus === 'connected' ? (
         <div className="joinedBanner">{"✓"} You{"'"}re connected with {person.full_name?.split(' ')[0]}.</div>

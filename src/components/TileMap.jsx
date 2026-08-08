@@ -72,8 +72,8 @@ export const TileMap = ({ center: propCenter, zoom: propZoom, pins, pickable, on
 
   const handlePointerDown = useCallback((e) => {
     if (e.button && e.button !== 0) return;
+    if (e.target.closest('.tilePin')) return;
     dragRef.current = { x: e.clientX, y: e.clientY, center: { ...center }, moved: false };
-    ref.current?.setPointerCapture(e.pointerId);
     e.preventDefault();
   }, [center]);
 
@@ -90,7 +90,7 @@ export const TileMap = ({ center: propCenter, zoom: propZoom, pins, pickable, on
   const handlePointerUp = useCallback((e) => {
     const wasDrag = dragRef.current?.moved;
     dragRef.current = null;
-    if (!wasDrag && pickable && ref.current) {
+    if (!wasDrag && pickable && ref.current && !e.target.closest('.tilePin')) {
       const rect = ref.current.getBoundingClientRect();
       const cPx = lonLatToWorldPx(center.lng, center.lat, zoom);
       const oX = cPx.x - size.w / 2;

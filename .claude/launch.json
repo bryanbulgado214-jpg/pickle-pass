@@ -4,9 +4,9 @@
     {
       "name": "pickle-pass-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--host", "--port", "5174"],
-      "port": 5174,
-      "autoPort": false
+      "runtimeArgs": ["run", "dev", "--", "--host"],
+      "port": 5176,
+      "autoPort": true
     }
   ]
 }
