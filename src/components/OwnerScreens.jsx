@@ -174,6 +174,7 @@ export function OwnerNew({ courtId, onPost }) {
   const [cap, setCap] = useState(20);
   const [fee, setFee] = useState(150);
   const [schedule, setSchedule] = useState('Today 4:00-7:00 PM');
+  const [numCourts, setNumCourts] = useState(1);
   const [posted, setPosted] = useState(false);
 
   const typeLabels = { OPEN_PLAY: 'OPEN PLAY', TRAINING: 'TRAINING', RENTAL: 'RENTAL' };
@@ -187,6 +188,7 @@ export function OwnerNew({ courtId, onPost }) {
       fee,
       cap: type === 'RENTAL' ? null : cap,
       schedule_text: schedule,
+      num_courts: numCourts,
     });
     setPosted(true);
     onPost?.();
@@ -222,9 +224,15 @@ export function OwnerNew({ courtId, onPost }) {
           </div>
         )}
       </div>
-      <div className="formRow">
-        <label>Schedule</label>
-        <input className="input" value={schedule} onChange={(e) => setSchedule(e.target.value)} />
+      <div className="formSplit">
+        <div className="formRow">
+          <label>Schedule</label>
+          <input className="input" value={schedule} onChange={(e) => setSchedule(e.target.value)} />
+        </div>
+        <div className="formRow">
+          <label>Courts to use</label>
+          <input className="input" type="number" min="1" value={numCourts} onChange={(e) => setNumCourts(Math.max(1, +e.target.value))} />
+        </div>
       </div>
 
       {posted ? (

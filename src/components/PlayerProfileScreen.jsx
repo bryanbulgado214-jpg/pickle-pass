@@ -8,6 +8,7 @@ export default function PlayerProfileScreen({ profileId, onBack }) {
   const [person, setPerson] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState(null);
   const [requestId, setRequestId] = useState(null);
+  const [sessionCount, setSessionCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,6 +23,13 @@ export default function PlayerProfileScreen({ profileId, onBack }) {
       .eq('id', profileId)
       .single();
     setPerson(prof);
+
+    const { count: sessCount } = await supabase
+      .from('session_participants')
+      .select('id', { count: 'exact', head: true })
+      .eq('profile_id', profileId)
+      .eq('status', 'confirmed');
+    setSessionCount(sessCount || 0);
 
     const { data: conn } = await supabase
       .from('connections')
@@ -100,7 +108,9 @@ export default function PlayerProfileScreen({ profileId, onBack }) {
     <div className="pane">
       <button className="back" onClick={onBack}>{"←"} Back</button>
       <div className="profileHero">
-        <CourtBackdrop />
+        {person.cover_url
+          ? <img src={person.cover_url} alt="" className="coverPhoto" />
+          : <CourtBackdrop />}
         <div className="profilePhotoBig">
           <PersonAvatar name={person.full_name} photo={person.photo_url} size={140} />
         </div>
@@ -108,8 +118,22 @@ export default function PlayerProfileScreen({ profileId, onBack }) {
       <div className="profileNameRow">
         <div className="profileName">{person.full_name}</div>
       </div>
-      <div className="sub" style={{ marginBottom: 16 }}>
+      <div className="sub" style={{ marginBottom: 4 }}>
         Member since {new Date(person.member_since || person.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+        {person.skill_level && <span> · {person.skill_level}</span>}
+        {person.hometown && <span> · {person.hometown}</span>}
+      </div>
+      {person.bio && <div className="profileBio">{person.bio}</div>}
+
+      <div className="statGrid" style={{ marginTop: 12, marginBottom: 14 }}>
+        <div className="stat">
+          <div className="statK">SESSIONS PLAYED</div>
+          <div className="statV">{sessionCount}</div>
+        </div>
+        <div className="stat">
+          <div className="statK">WEEKLY XP</div>
+          <div className="statV">{person.weekly_xp || 0} XP</div>
+        </div>
       </div>
 
       {connectionStatus === 'connected' ? (

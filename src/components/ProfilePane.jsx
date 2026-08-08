@@ -17,6 +17,7 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenRe
   const [editBio, setEditBio] = useState('');
   const [saving, setSaving] = useState(false);
   const fileRef = useRef(null);
+  const coverRef = useRef(null);
 
   useEffect(() => {
     if (!profile) return;
@@ -64,6 +65,32 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenRe
     setUploading(false);
   }
 
+  async function handleCoverUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    const ext = file.name.split('.').pop();
+    const path = `${profile.id}/cover.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from('profile-photos')
+      .upload(path, file, { upsert: true });
+    if (upErr) {
+      setUploadError('Cover upload failed.');
+      setUploading(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage
+      .from('profile-photos')
+      .getPublicUrl(path);
+    try {
+      await updateProfile({ cover_url: `${urlData.publicUrl}?t=${Date.now()}` });
+    } catch (err) {
+      setUploadError('Cover saved but profile update failed.');
+    }
+    setUploading(false);
+  }
+
   function startEdit() {
     setEditName(profile.full_name || '');
     setEditSkill(profile.skill_level || '');
@@ -94,7 +121,13 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenRe
   return (
     <div className="pane">
       <div className="profileHero">
-        <CourtBackdrop />
+        {profile.cover_url
+          ? <img src={profile.cover_url} alt="" className="coverPhoto" />
+          : <CourtBackdrop />}
+        <button className="coverEditBtn" onClick={() => coverRef.current?.click()}>
+          {uploading ? '...' : '\u{1F4F7} Cover'}
+        </button>
+        <input ref={coverRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleCoverUpload} />
         <div className="profilePhotoBig" onClick={() => fileRef.current?.click()} style={{ cursor: 'pointer' }}>
           <PersonAvatar name={profile.full_name} photo={profile.photo_url} size={90} />
           <div className="photoEditBadge">{uploading ? '...' : '\u{1F4F7}'}</div>

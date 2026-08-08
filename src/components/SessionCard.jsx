@@ -43,6 +43,7 @@ export default function SessionCard({ session, court, onOpen, participants }) {
                 })
               : '')}
             {court.town ? ` · ${court.town}` : ''}
+            {session.num_courts > 1 ? ` · ${session.num_courts} courts` : ''}
           </div>
         </div>
         <div className="cardFee">

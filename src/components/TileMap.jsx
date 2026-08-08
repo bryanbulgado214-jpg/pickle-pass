@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 const TILE_SIZE = 256;
 
@@ -33,9 +33,24 @@ const fitZoom = (points, width, height, maxZoom = 16) => {
   return 1;
 };
 
-export const TileMap = ({ center, zoom, pins, pickable, onPick, className }) => {
+export const TileMap = ({ center: propCenter, zoom: propZoom, pins, pickable, onPick, className }) => {
   const ref = useRef(null);
   const [size, setSize] = useState({ w: 320, h: 260 });
+  const [center, setCenter] = useState(propCenter);
+  const [zoom, setZoom] = useState(propZoom);
+  const dragRef = useRef(null);
+  const lastPropCenter = useRef(propCenter);
+
+  useEffect(() => {
+    if (propCenter.lat !== lastPropCenter.current.lat || propCenter.lng !== lastPropCenter.current.lng) {
+      setCenter(propCenter);
+      lastPropCenter.current = propCenter;
+    }
+  }, [propCenter.lat, propCenter.lng]);
+
+  useEffect(() => {
+    setZoom(propZoom);
+  }, [propZoom]);
 
   useEffect(() => {
     if (ref.current) setSize({ w: ref.current.clientWidth, h: ref.current.clientHeight });
@@ -51,19 +66,62 @@ export const TileMap = ({ center, zoom, pins, pickable, onPick, className }) => 
     for (let ty = Math.floor(originY / TILE_SIZE); ty <= Math.floor((originY + size.h) / TILE_SIZE); ty++) {
       if (ty < 0 || ty >= numTiles) continue;
       const wrapped = ((tx % numTiles) + numTiles) % numTiles;
-      tiles.push({ key: `${tx}-${ty}`, left: tx * TILE_SIZE - originX, top: ty * TILE_SIZE - originY, x: wrapped, y: ty });
+      tiles.push({ key: `${zoom}-${wrapped}-${ty}`, left: tx * TILE_SIZE - originX, top: ty * TILE_SIZE - originY, x: wrapped, y: ty });
     }
   }
 
-  const handleClick = (e) => {
-    if (!pickable || !ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const { lon, lat } = worldPxToLonLat(e.clientX - rect.left + originX, e.clientY - rect.top + originY, zoom);
-    onPick(lat, lon);
-  };
+  const handlePointerDown = useCallback((e) => {
+    if (e.button && e.button !== 0) return;
+    dragRef.current = { x: e.clientX, y: e.clientY, center: { ...center }, moved: false };
+    ref.current?.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  }, [center]);
+
+  const handlePointerMove = useCallback((e) => {
+    if (!dragRef.current) return;
+    const dx = e.clientX - dragRef.current.x;
+    const dy = e.clientY - dragRef.current.y;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragRef.current.moved = true;
+    const startPx = lonLatToWorldPx(dragRef.current.center.lng, dragRef.current.center.lat, zoom);
+    const newPos = worldPxToLonLat(startPx.x - dx, startPx.y - dy, zoom);
+    setCenter({ lat: Math.max(-85, Math.min(85, newPos.lat)), lng: newPos.lon });
+  }, [zoom]);
+
+  const handlePointerUp = useCallback((e) => {
+    const wasDrag = dragRef.current?.moved;
+    dragRef.current = null;
+    if (!wasDrag && pickable && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      const cPx = lonLatToWorldPx(center.lng, center.lat, zoom);
+      const oX = cPx.x - size.w / 2;
+      const oY = cPx.y - size.h / 2;
+      const { lon, lat } = worldPxToLonLat(e.clientX - rect.left + oX, e.clientY - rect.top + oY, zoom);
+      onPick?.(lat, lon);
+    }
+  }, [pickable, onPick, center, zoom, size]);
+
+  const handleWheel = useCallback((e) => {
+    e.preventDefault();
+    setZoom((z) => Math.max(2, Math.min(18, z + (e.deltaY < 0 ? 1 : -1))));
+  }, []);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [handleWheel]);
 
   return (
-    <div ref={ref} className={"tileMap" + (className ? " " + className : "")} onClick={handleClick}>
+    <div
+      ref={ref}
+      className={"tileMap" + (className ? " " + className : "")}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => { dragRef.current = null; }}
+      style={{ touchAction: 'none' }}
+    >
       {tiles.map((t) => (
         <img key={t.key} src={`https://tile.openstreetmap.org/${zoom}/${t.x}/${t.y}.png`} alt="" draggable={false}
           className="tileImg" style={{ left: t.left, top: t.top }} />

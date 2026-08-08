@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
@@ -8,19 +8,47 @@ function ClubForm({ onCreated, onCancel }) {
   const { user } = useAuth();
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
+  const [maxMembers, setMaxMembers] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const fileRef = useRef(null);
+
+  function handlePhotoSelect(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
     setError(null);
+
+    let photoUrl = null;
+    if (photoFile) {
+      const ext = photoFile.name.split('.').pop();
+      const path = `clubs/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('profile-photos')
+        .upload(path, photoFile, { upsert: false });
+      if (!upErr) {
+        const { data: urlData } = supabase.storage.from('profile-photos').getPublicUrl(path);
+        photoUrl = urlData.publicUrl;
+      }
+    }
+
     const { data, error: insertErr } = await supabase.from('clubs').insert({
       name: name.trim(),
       description: desc.trim(),
       owner_id: user.id,
+      photo_url: photoUrl,
+      max_members: maxMembers ? parseInt(maxMembers) : null,
     }).select().single();
+
     if (insertErr) {
       setError(insertErr.message);
       setSaving(false);
@@ -49,6 +77,12 @@ function ClubForm({ onCreated, onCancel }) {
       <div className="sub">Start a pickleball group on Siquijor</div>
       {error && <div className="errorBanner">{error}</div>}
       <form onSubmit={handleSubmit}>
+        <div className="clubPhotoUpload" onClick={() => fileRef.current?.click()}>
+          {photoPreview
+            ? <img src={photoPreview} alt="" className="clubPhotoPreview" />
+            : <div className="clubPhotoPlaceholder">{"\u{1F4F7}"} Add Photo</div>}
+          <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoSelect} />
+        </div>
         <div className="formRow" style={{ marginTop: 16 }}>
           <label>CLUB NAME</label>
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Siquijor Smashers" />
@@ -56,6 +90,10 @@ function ClubForm({ onCreated, onCancel }) {
         <div className="formRow">
           <label>DESCRIPTION</label>
           <textarea className="composerInput" rows={3} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What's your club about?" />
+        </div>
+        <div className="formRow">
+          <label>MAX MEMBERS (optional)</label>
+          <input className="input" type="number" value={maxMembers} onChange={(e) => setMaxMembers(e.target.value)} placeholder="Leave empty for unlimited" />
         </div>
         <button className="cta" type="submit" disabled={saving || !name.trim()}>
           {saving ? 'Creating...' : 'Create Club'}
@@ -68,8 +106,12 @@ function ClubForm({ onCreated, onCancel }) {
 function ClubDetail({ club, onBack }) {
   const { user } = useAuth();
   const [members, setMembers] = useState([]);
+  const [pendingMembers, setPendingMembers] = useState([]);
   const [isMember, setIsMember] = useState(false);
+  const [myMembership, setMyMembership] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const photoRef = useRef(null);
 
   useEffect(() => {
     loadMembers();
@@ -82,16 +124,22 @@ function ClubDetail({ club, onBack }) {
       .select('*, profiles:profile_id(id, full_name, photo_url)')
       .eq('club_id', club.id)
       .order('joined_at', { ascending: true });
-    setMembers(data || []);
-    setIsMember((data || []).some((m) => m.profile_id === user.id));
+    const all = data || [];
+    setMembers(all.filter((m) => m.status !== 'pending'));
+    setPendingMembers(all.filter((m) => m.status === 'pending'));
+    const mine = all.find((m) => m.profile_id === user.id);
+    setIsMember(!!mine && mine.status !== 'pending');
+    setMyMembership(mine || null);
     setLoading(false);
   }
 
   async function handleJoin() {
+    const status = club.max_members ? 'pending' : 'member';
     await supabase.from('club_members').insert({
       club_id: club.id,
       profile_id: user.id,
       role: 'member',
+      status,
     });
     loadMembers();
   }
@@ -103,32 +151,102 @@ function ClubDetail({ club, onBack }) {
     loadMembers();
   }
 
+  async function handleApprove(memberId) {
+    await supabase.from('club_members')
+      .update({ status: 'member' })
+      .eq('id', memberId);
+    loadMembers();
+  }
+
+  async function handleReject(memberId) {
+    await supabase.from('club_members')
+      .delete()
+      .eq('id', memberId);
+    loadMembers();
+  }
+
+  async function handlePhotoUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const ext = file.name.split('.').pop();
+    const path = `clubs/${club.id}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from('profile-photos')
+      .upload(path, file, { upsert: true });
+    if (!upErr) {
+      const { data: urlData } = supabase.storage.from('profile-photos').getPublicUrl(path);
+      await supabase.from('clubs').update({ photo_url: `${urlData.publicUrl}?t=${Date.now()}` }).eq('id', club.id);
+      club.photo_url = `${urlData.publicUrl}?t=${Date.now()}`;
+    }
+    setUploading(false);
+  }
+
   const isOwner = club.owner_id === user.id;
+  const activeMembers = members.filter((m) => m.status !== 'pending');
+  const isFull = club.max_members && activeMembers.length >= club.max_members;
+  const isPending = myMembership?.status === 'pending';
 
   return (
     <div className="pane">
       <button className="back" onClick={onBack}>{"← Back"}</button>
 
       <div className="clubHero">
-        <div className="clubInitial">{club.name.charAt(0).toUpperCase()}</div>
+        {club.photo_url
+          ? <img src={club.photo_url} alt="" className="clubHeroImg" />
+          : <div className="clubInitial">{club.name.charAt(0).toUpperCase()}</div>}
+        {isOwner && (
+          <button className="coverEditBtn" onClick={() => photoRef.current?.click()}>
+            {uploading ? '...' : '\u{1F4F7}'}
+          </button>
+        )}
+        <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
       </div>
 
       <div className="h1" style={{ marginTop: 12 }}>{club.name}</div>
       {club.description && <div className="sub" style={{ marginTop: 4 }}>{club.description}</div>}
       <div className="cardMeta" style={{ marginTop: 6 }}>
-        {members.length} member{members.length !== 1 ? 's' : ''}
+        {activeMembers.length}{club.max_members ? `/${club.max_members}` : ''} member{activeMembers.length !== 1 ? 's' : ''}
         {isOwner && ' · You own this club'}
       </div>
 
-      {!loading && !isMember && (
-        <button className="cta" onClick={handleJoin}>Join Club</button>
+      {!loading && !isMember && !isPending && (
+        isFull
+          ? <div className="waitlistBanner" style={{ marginTop: 12 }}>This club is full</div>
+          : <button className="cta" onClick={handleJoin}>
+              {club.max_members ? 'Request to Join' : 'Join Club'}
+            </button>
+      )}
+      {isPending && (
+        <div className="waitlistBanner" style={{ marginTop: 12 }}>
+          {"\u{23F3}"} Your request is pending approval
+        </div>
       )}
       {!loading && isMember && !isOwner && (
         <button className="cancelLink" onClick={handleLeave} style={{ marginTop: 12 }}>Leave Club</button>
       )}
 
+      {isOwner && pendingMembers.length > 0 && (
+        <>
+          <div className="h2">PENDING REQUESTS</div>
+          {pendingMembers.map((m) => (
+            <div key={m.id} className="playerRow">
+              <PersonAvatar name={m.profiles?.full_name} photo={m.profiles?.photo_url} size={38} />
+              <div className="playerInfo">
+                <div className="feedName">{m.profiles?.full_name || 'Player'}</div>
+                <div className="cardMeta">Wants to join</div>
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button className="approveBtn" onClick={() => handleApprove(m.id)}>{"✓"}</button>
+                <button className="rejectBtn" onClick={() => handleReject(m.id)}>{"✕"}</button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
       <div className="h2">MEMBERS</div>
-      {members.map((m) => (
+      {members.filter((m) => m.status !== 'pending').map((m) => (
         <div key={m.id} className="playerRow">
           <PersonAvatar name={m.profiles?.full_name} photo={m.profiles?.photo_url} size={38} />
           <div className="playerInfo">
@@ -195,10 +313,14 @@ export default function ClubScreen({ onBack }) {
         const memberCount = c.club_members?.[0]?.count || 0;
         return (
           <button key={c.id} className="clubRow" onClick={() => setDetail(c)}>
-            <div className="clubRowIcon">{c.name.charAt(0).toUpperCase()}</div>
+            {c.photo_url
+              ? <img src={c.photo_url} alt="" className="clubRowImg" />
+              : <div className="clubRowIcon">{c.name.charAt(0).toUpperCase()}</div>}
             <div className="playerInfo">
               <div className="feedName">{c.name}</div>
-              <div className="cardMeta">{memberCount} member{memberCount !== 1 ? 's' : ''}</div>
+              <div className="cardMeta">
+                {memberCount}{c.max_members ? `/${c.max_members}` : ''} member{memberCount !== 1 ? 's' : ''}
+              </div>
             </div>
             <span className="profileLinkVal">{"→"}</span>
           </button>

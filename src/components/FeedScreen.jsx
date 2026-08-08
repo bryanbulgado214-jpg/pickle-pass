@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { C } from '../lib/constants';
@@ -14,10 +14,12 @@ export default function FeedScreen({ onOpenProfile }) {
   const [error, setError] = useState(null);
   const [commentsPostId, setCommentsPostId] = useState(null);
   const [feedFilter, setFeedFilter] = useState('foryou');
-  const [newCount, setNewCount] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const paneRef = useRef(null);
+  const touchRef = useRef(null);
 
-  const loadPosts = useCallback(async () => {
-    setLoading(true);
+  const loadPosts = useCallback(async (silent) => {
+    if (!silent) setLoading(true);
     setError(null);
 
     const { data: rawPosts, error: err } = await supabase
@@ -64,22 +66,50 @@ export default function FeedScreen({ onOpenProfile }) {
     const channel = supabase
       .channel('feed-realtime')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, () => {
-        loadPosts();
+        loadPosts(true);
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'posts' }, () => {
-        loadPosts();
+        loadPosts(true);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [loadPosts]);
 
-  const handleShowNew = () => {
-    setNewCount(0);
-    loadPosts();
-  };
+  async function handleRefresh() {
+    setRefreshing(true);
+    await loadPosts(true);
+    setRefreshing(false);
+  }
+
+  function onTouchStart(e) {
+    const pane = paneRef.current;
+    if (!pane || pane.scrollTop > 5) return;
+    touchRef.current = { y: e.touches[0].clientY, pulling: false };
+  }
+
+  function onTouchMove(e) {
+    if (!touchRef.current) return;
+    const dy = e.touches[0].clientY - touchRef.current.y;
+    if (dy > 10 && paneRef.current?.scrollTop <= 0) {
+      touchRef.current.pulling = true;
+    }
+  }
+
+  function onTouchEnd() {
+    if (touchRef.current?.pulling && !refreshing) {
+      handleRefresh();
+    }
+    touchRef.current = null;
+  }
 
   return (
-    <div className="pane">
+    <div
+      className="pane"
+      ref={paneRef}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       <div className="feedTopRow">
         <div className="feedSeg">
           <div className="segment">
@@ -97,15 +127,14 @@ export default function FeedScreen({ onOpenProfile }) {
             </button>
           </div>
         </div>
+        <button className="refreshBtn" onClick={handleRefresh} disabled={refreshing}>
+          {refreshing ? '...' : '\u{21BB}'}
+        </button>
       </div>
 
-      {error && <div className="errorBanner">{error}</div>}
+      {refreshing && <div className="pullHint">Refreshing...</div>}
 
-      {newCount > 0 && (
-        <button className="newPostsBanner" onClick={handleShowNew}>
-          {newCount} new {newCount === 1 ? 'post' : 'posts'} — tap to refresh
-        </button>
-      )}
+      {error && <div className="errorBanner">{error}</div>}
 
       <PostComposer onPostCreated={(optimistic) => {
         if (optimistic) {

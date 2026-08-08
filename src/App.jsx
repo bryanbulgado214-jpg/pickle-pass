@@ -112,8 +112,11 @@ function AppInner() {
 
   if (loading) {
     return (
-      <div className="appShell" style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <LoadingBall />
+      <div className="splashScreen">
+        <img src={LOGO_ICON} alt="" className="splashLogo" />
+        <span className="splashName">Pickle<span> Pass</span></span>
+        <div className="splashBall" />
+        <div className="splashSub">Siquijor Pickleball</div>
       </div>
     );
   }
@@ -201,7 +204,7 @@ function AppInner() {
       if (ownerTab === 'earnings') return <OwnerPayoutLedger />;
     }
 
-    if (tab === 'feed') return <FeedScreen />;
+    if (tab === 'feed') return <FeedScreen onOpenProfile={(id) => openOverlay('playerProfile', id)} />;
     if (tab === 'play') return <SessionsScreen />;
     if (tab === 'chat') return <ChatScreen onBack={() => setTab('feed')} onOpenProfile={(id) => openOverlay('playerProfile', id)} onRead={() => setUnreadMsgCount(0)} />;
     if (tab === 'map') return <MapView onOpenCourt={(ct) => openOverlay('court', ct)} />;
