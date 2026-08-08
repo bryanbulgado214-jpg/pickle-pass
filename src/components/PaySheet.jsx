@@ -1,48 +1,45 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { C } from '../lib/constants';
+import { useAuth } from '../contexts/AuthContext';
 
-const XENDIT_METHODS = [
-  { id: 'gcash', label: 'GCash', note: 'Instant', icon: '🟢' },
-  { id: 'maya', label: 'Maya', note: 'Instant', icon: '🟣' },
-];
+const GCASH_NUMBER = '09456614065';
 
 export default function PaySheet({ fee, serviceFee, label, sessionId, tournamentId, bookingId, onClose, onConfirm }) {
-  const [method, setMethod] = useState('gcash');
+  const { user } = useAuth();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
   const total = fee + serviceFee;
 
-  async function handlePay() {
+  function copyNumber() {
+    navigator.clipboard.writeText(GCASH_NUMBER).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
+  }
+
+  async function handleConfirmSent() {
     setProcessing(true);
     setError(null);
 
     try {
-      const { data: { session: authSession } } = await supabase.auth.getSession();
-      if (!authSession) throw new Error('Not logged in');
-
-      const res = await supabase.functions.invoke('create-payment', {
-        body: {
-          session_id: sessionId || null,
-          tournament_id: tournamentId || null,
-          booking_id: bookingId || null,
-          amount: fee,
-          service_fee: serviceFee,
-          description: label,
-          payment_method: method,
-        },
+      const { error: insertErr } = await supabase.from('payments').insert({
+        profile_id: user.id,
+        session_id: sessionId || null,
+        tournament_id: tournamentId || null,
+        booking_id: bookingId || null,
+        amount: fee,
+        service_fee: serviceFee,
+        total,
+        currency: 'PHP',
+        payment_method: 'gcash',
+        status: 'pending',
       });
 
-      if (res.error) throw new Error(res.error.message || 'Payment failed');
-
-      const { invoice_url } = res.data;
-      if (invoice_url) {
-        window.location.href = invoice_url;
-      } else {
-        throw new Error('No checkout URL returned');
-      }
+      if (insertErr) throw insertErr;
+      onConfirm?.();
     } catch (err) {
-      console.error('Payment error:', err);
+      console.error('Payment record error:', err);
       setError(err.message || 'Something went wrong. Please try again.');
       setProcessing(false);
     }
@@ -52,7 +49,7 @@ export default function PaySheet({ fee, serviceFee, label, sessionId, tournament
     <div className="sheetScrim" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="sheetHandle" />
-        <h3 className="h1" style={{ fontSize: 20 }}>Confirm Payment</h3>
+        <h3 className="h1" style={{ fontSize: 20 }}>Pay via GCash</h3>
         <p className="cardSub" style={{ marginTop: 4 }}>{label}</p>
 
         <div className="payRows">
@@ -70,33 +67,27 @@ export default function PaySheet({ fee, serviceFee, label, sessionId, tournament
           </div>
         </div>
 
-        <h4 className="h2">PAYMENT METHOD</h4>
-        {XENDIT_METHODS.map((m) => (
-          <button
-            key={m.id}
-            className={"payMethod" + (method === m.id ? " on" : "")}
-            onClick={() => setMethod(m.id)}
-            disabled={processing}
-          >
-            <span className="pmIcon">{m.icon}</span>
-            <div className="pmDot" />
-            <span className="pmLabel">{m.label}</span>
-            <span className="pmNote">{m.note}</span>
+        <div className="gcashBox">
+          <div className="gcashLabel">Send exactly {"₱"}{total.toFixed(2)} to</div>
+          <button className="gcashNumber" onClick={copyNumber}>
+            {GCASH_NUMBER}
+            <span className="gcashCopy">{copied ? 'Copied!' : 'Tap to copy'}</span>
           </button>
-        ))}
+          <div className="gcashSteps">
+            <div className="gcashStep">1. Open your GCash app</div>
+            <div className="gcashStep">2. Tap Send Money</div>
+            <div className="gcashStep">3. Enter the number above and amount</div>
+            <div className="gcashStep">4. Complete the transfer, then tap below</div>
+          </div>
+        </div>
 
         {error && <div className="errorBanner" style={{ margin: '10px 0 0' }}>{error}</div>}
 
-        <button className="cta" onClick={handlePay} disabled={processing}>
-          {processing
-            ? 'Connecting to payment...'
-            : `Pay ₱${total.toFixed(2)} via ${XENDIT_METHODS.find((m) => m.id === method)?.label}`}
+        <button className="cta" onClick={handleConfirmSent} disabled={processing}>
+          {processing ? 'Confirming...' : "I've Sent the Payment"}
         </button>
-        <div className="xenditBadge">
-          <span className="xenditLock">{"🔒"}</span> Secured by <strong>Xendit</strong>
-        </div>
         <div className="fine">
-          You{"'"}ll be redirected to {XENDIT_METHODS.find((m) => m.id === method)?.label} to complete payment. Full refund if you cancel before the session starts.
+          Your spot is reserved once you confirm. Payment is verified manually — reach out if there are any issues.
         </div>
       </div>
     </div>
