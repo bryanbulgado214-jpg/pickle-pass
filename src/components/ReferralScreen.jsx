@@ -88,7 +88,7 @@ export default function ReferralScreen({ onBack }) {
       <div className="statGrid" style={{ marginTop: 14 }}>
         <div className="stat">
           <div className="statK">FRIENDS INVITED</div>
-          <div className="statV" style={{ color: C.ball }}>{referrals.length}</div>
+          <div className="statV">{referrals.length}</div>
         </div>
         <div className="stat">
           <div className="statK">POINTS EARNED</div>

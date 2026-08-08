@@ -148,7 +148,7 @@ export default function ProfilePane({ onOpenNetwork, onOpenLeaderboard, onOpenRe
       <div className="statGrid" style={{ marginTop: 14 }}>
         <div className="stat">
           <div className="statK">POINTS BALANCE</div>
-          <div className="statV" style={{ color: C.ball }}>{profile.points} pts</div>
+          <div className="statV">{profile.points} pts</div>
         </div>
         <div className="stat">
           <div className="statK">WEEKLY XP</div>

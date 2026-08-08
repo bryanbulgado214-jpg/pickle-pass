@@ -122,7 +122,7 @@ export default function OwnerAnalytics({ court }) {
       <div className="statGrid">
         <div className="stat">
           <div className="statK">TOTAL REVENUE</div>
-          <div className="statV" style={{ color: C.ball }}>{"₱"}{totalRevenue.toLocaleString()}</div>
+          <div className="statV">{"₱"}{totalRevenue.toLocaleString()}</div>
         </div>
         <div className="stat">
           <div className="statK">TOTAL PLAYERS</div>

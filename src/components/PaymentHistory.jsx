@@ -133,7 +133,7 @@ export default function PaymentHistory({ onBack }) {
       <div className="statGrid">
         <div className="stat">
           <div className="statK">TOTAL SPENT</div>
-          <div className="statV" style={{ color: C.ball }}>{"₱"}{totalSpent.toLocaleString()}</div>
+          <div className="statV" >{"₱"}{totalSpent.toLocaleString()}</div>
         </div>
         <div className="stat">
           <div className="statK">TRANSACTIONS</div>
@@ -236,7 +236,7 @@ export function OwnerPayoutLedger() {
       <div className="statGrid">
         <div className="stat">
           <div className="statK">TOTAL REVENUE</div>
-          <div className="statV" style={{ color: C.ball }}>{"₱"}{totalRevenue.toLocaleString()}</div>
+          <div className="statV" >{"₱"}{totalRevenue.toLocaleString()}</div>
         </div>
         <div className="stat">
           <div className="statK">TOTAL PLAYERS</div>
